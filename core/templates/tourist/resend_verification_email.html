@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Resend Verification Email{% endblock %}
+
+{% load static %} 
+
+{% block content %}
+<section class="relative flex items-center justify-center h-screen bg-cover bg-center" 
+         style="background-image: url('{% static 'images/anda.webp' %}');">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Card Container -->
+    <div class="relative z-10 bg-white bg-opacity-90 backdrop-blur-md shadow-lg p-6 rounded-lg max-w-md text-center">
+        <h2 class="text-2xl font-semibold text-blue-700 mt-4">Resend Verification Email</h2>
+        
+        <!-- Success/Error Messages -->
+        {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                    <div class="text-lg {% if message.tags == 'error' %}text-red-500{% elif message.tags == 'info' %}text-yellow-500{% else %}text-green-500{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Form to resend verification email -->
+        <form method="POST">
+            {% csrf_token %}
+            <label for="email" class="block text-gray-600 mt-4">Enter your email address</label>
+            <input type="email" name="email" id="email" class="px-4 py-2 w-full border rounded-lg mt-2" required>
+            <button type="submit" class="mt-4 mb-4 px-5 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-700 transition">Resend Verification Email</button>
+        </form>
+
+        <!-- Back to Home -->
+        <a href="/" class="mt-22 px-5 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition">Back to Home</a>
+    </div>
+</section>
+{% endblock %}

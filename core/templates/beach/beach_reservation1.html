@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% block title %}Beach Dashboard{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'beach/beach_sidebar.html' %} <!-- Include Sidebar -->
+
+
+    {% if messages %}
+    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-full max-w-md mt-10">
+        <div class="p-4 text-green-700 bg-green-100 border border-green-400 rounded-lg text-center shadow-md" role="alert">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-auto">
+            <h2 class="text-2xl font-semibold text-center text-blue-700 mb-4">Create Reservation</h2>
+
+            <form method="POST" action="{% url 'beach_create_reservation' %}" id="reservation-form">
+                {% csrf_token %}
+
+                <!-- Beach Name -->
+                <label class="block text-gray-700 font-medium mb-1">Beach Name</label>
+                <select name="beach" class="w-full border rounded-lg px-3 py-2 mb-4" required>
+                    <option value="" disabled selected>Select a Beach</option>
+                    {% for beach in beaches %}
+                        <option value="{{ beach.id }}">{{ beach.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Number of People -->
+                <label class="block text-gray-700 font-medium mb-1">Number of People</label>
+                <input type="number" name="num_people" id="num_people" min="1" class="w-full border rounded-lg px-3 py-2 mb-4" required>
+
+                <!-- Total Price -->
+                <label class="block text-gray-700 font-medium mb-1">Total Price</label>
+                <input type="text" id="total_price" class="w-full border rounded-lg px-3 py-2 mb-4 bg-gray-100" disabled>
+                <input type="hidden" name="total_price" id="total_price_hidden">
+
+                <input type="hidden" name="payment_method" value="cash">
+                <input type="hidden" name="status" value="paid">
+
+                <div class="flex justify-end mt-4">
+                    <button type="button" id="confirm-reservation" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Confirm Reservation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+        <!-- Confirmation Modal -->
+        <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4">Are you sure?</h2>
+                <p class="text-gray-700 mb-4">Do you want to confirm this reservation?</p>
+                <div class="flex justify-between mt-4">
+                    <button id="close-confirmation-modal" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</button>
+                    <button id="submit-reservation" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Yes, Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+                <h2 class="text-2xl font-semibold text-green-600 mb-4">Reservation Successful!</h2>
+                <p class="text-gray-700">Your reservation has been confirmed.</p>
+                <button id="close-success-modal" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">OK</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="receipt-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
+            <!-- Receipt Header -->
+            <div class="text-center mb-6">
+                <img src="{% static 'images/a.png' %}" alt="Beach Resort Logo" class="mx-auto mb-4 h-16">
+                <h2 class="text-3xl font-semibold text-green-600 mb-2">Official Receipt</h2>
+                <p class="text-gray-600 text-sm">Anda Public Beach Resort</p>
+                <p class="text-gray-500 text-xs">Issued Date: <span id="receipt-issue-date"></span></p>
+            </div>
+            
+            <!-- Receipt Body -->
+            <div class="space-y-4" id="receipt-content">
+                <div class="flex justify-between text-gray-800">
+                    <span class="font-medium">Beach Name:</span>
+                    <span id="receipt-beach-name"></span>
+                </div>
+                <div class="flex justify-between text-gray-800">
+                    <span class="font-medium">Reservation Date:</span>
+                    <span id="receipt-reservation-date"></span>
+                </div>
+                <div class="flex justify-between text-gray-800">
+                    <span class="font-medium">Number of People:</span>
+                    <span id="receipt-num-people"></span>
+                </div>
+                <div class="flex justify-between text-gray-800">
+                    <span class="font-medium">Total Price:</span>
+                    <span id="receipt-total-price"></span>
+                </div>
+                <div class="flex justify-between text-gray-800">
+                    <span class="font-medium">Payment Method:</span>
+                    <span id="receipt-payment-method"></span>
+                </div>
+                <div class="flex justify-between text-gray-800">
+                    <span class="font-medium">Status:</span>
+                    <span id="receipt-status"></span>
+                </div>
+                <!-- Add Collector's Name -->
+                <div class="flex justify-between text-gray-800">
+                    <span class="font-medium">Collector:</span>
+                    <span id="receipt-collector-name"></span>
+                </div>
+            </div>
+        
+            <!-- Divider -->
+            <hr class="my-6 border-t-2 border-gray-200">
+        
+            <!-- Footer -->
+            <div class="text-center text-xs text-gray-500">
+                <p>Thank you for choosing Anda Public Beach Resort. We hope you have a great experience!</p>
+            </div>
+        
+            <!-- Buttons -->
+            <div class="flex justify-between mt-6">
+                <button id="print-receipt" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Print Receipt</button>
+                <button id="close-receipt-modal" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Close</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Dynamically calculate the total price when the number of people is changed
+            document.getElementById("num_people").addEventListener("input", function () {
+                const pricePerPerson = 30; // Set your price per person
+                const numPeople = parseInt(this.value) || 0; // Get the number of people
+                const totalPrice = numPeople * pricePerPerson;
+
+                // Update the displayed total price and hidden input value
+                document.getElementById("total_price").value = totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "";
+                document.getElementById("total_price_hidden").value = totalPrice;
+            });
+           
+
+            // Show confirmation modal when the "Confirm Reservation" button is clicked
+            document.getElementById("confirm-reservation").addEventListener("click", function () {
+                // Show the confirmation modal
+                document.getElementById("confirmation-modal").classList.remove("hidden");
+            });
+
+            // Close the confirmation modal without submitting the form
+            document.getElementById("close-confirmation-modal").addEventListener("click", function () {
+                document.getElementById("reservation-modal").classList.remove("hidden");
+            });
+
+            // Submit the form after the confirmation modal is accepted
+            document.getElementById("submit-reservation").addEventListener("click", function () {
+                const formData = new FormData(document.getElementById("reservation-form"));
+
+                // Send the reservation data to the backend to create the reservation and generate the receipt
+                fetch("{% url 'beach_create_reservation' %}", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Hide the confirmation modal
+                        document.getElementById("confirmation-modal").classList.add("hidden");
+
+                        // Populate the receipt modal with the returned data
+                        document.getElementById("receipt-beach-name").innerText = data.receipt_data.beach_name;
+                        document.getElementById("receipt-num-people").innerText = data.receipt_data.num_people;
+                        document.getElementById("receipt-total-price").innerText = `₱${data.receipt_data.total_price.toLocaleString()}`;
+                        document.getElementById("receipt-payment-method").innerText = data.receipt_data.payment_method;
+                        document.getElementById("receipt-status").innerText = data.receipt_data.status;
+                        document.getElementById("receipt-reservation-date").innerText = data.receipt_data.reservation_date;
+                        document.getElementById("receipt-collector-name").innerText = data.receipt_data.collector_full_name;
+                        document.getElementById("receipt-issue-date").innerText = new Date().toLocaleDateString();  // Issue Date
+
+                        // Show the receipt modal
+                        document.getElementById("receipt-modal").classList.remove("hidden");
+                    } else {
+                        console.error('Error in reservation:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+
+            
+
+            // Close the success modal and reload the page after successful reservation
+            document.getElementById("close-success-modal").addEventListener("click", function () {
+                document.getElementById("success-modal").classList.add("hidden");
+                window.location.reload(); // Reload the page to reset state
+            });
+
+            // Close the receipt modal
+            document.getElementById("close-receipt-modal").addEventListener("click", function () {
+                document.getElementById("receipt-modal").classList.add("hidden");
+            });
+
+            // Trigger print functionality when clicking the "Print Receipt" button
+            document.getElementById("print-receipt").addEventListener("click", function () {
+    // Retrieve the receipt content data from the DOM
+                const receiptContent = document.getElementById("receipt-content").innerHTML;
+                const receiptIssueDate = document.getElementById("receipt-issue-date").innerText;
+                const receiptBeachName = document.getElementById("receipt-beach-name").innerText;
+                const receiptNumPeople = document.getElementById("receipt-num-people").innerText;
+                const receiptTotalPrice = document.getElementById("receipt-total-price").innerText;
+                const receiptPaymentMethod = document.getElementById("receipt-payment-method").innerText;
+                const receiptStatus = document.getElementById("receipt-status").innerText;
+                const receiptCollectorName = document.getElementById("receipt-collector-name").innerText;
+                const receiptReservationDate = document.getElementById("receipt-reservation-date").innerText; // Get the reservation date from the DOM
+
+                const logoUrl = "{% static 'images/a.png' %}"; // Replace with the correct path to your logo image
+
+                // Create a new print page with a custom header and footer
+                const printWindow = window.open('', '', 'height=600,width=800');
+
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Receipt</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            .receipt { text-align: left; margin: 20px; }
+                            .receipt-header {
+                                text-align: center;
+                                margin-bottom: 30px;
+                            }
+                            .receipt-header img {
+                                height: 50px;
+                                margin-bottom: 10px;
+                            }
+                            .receipt-footer {
+                                text-align: center;
+                                font-size: 12px;
+                                margin-top: 30px;
+                            }
+                            .receipt .bold { font-weight: bold; }
+                            .receipt .text-small { font-size: 14px; }
+                            .receipt .text-gray { color: #6b7280; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="receipt">
+                            <div class="receipt-header">
+                                <img src="${logoUrl}" alt="Logo">
+                                <h2>Official Receipt</h2>
+                                <p>Anda Public Beach Resort</p>
+                                <p>Issued Date: ${receiptIssueDate}</p>
+                            </div>
+                            <div class="receipt-body">
+                                <div><span class="bold">Beach Name:</span> ${receiptBeachName}</div>
+                                <div><span class="bold">Reservation Date:</span> ${receiptReservationDate}</div>
+                                <div><span class="bold">Number of People:</span> ${receiptNumPeople}</div>
+                                <div><span class="bold">Total Price:</span> ${receiptTotalPrice}</div>
+                                <div><span class="bold">Payment Method:</span> ${receiptPaymentMethod}</div>
+                                <div><span class="bold">Status:</span> ${receiptStatus}</div>
+                                <div><span class="bold">Collector:</span> ${receiptCollectorName}</div>
+                            </div>
+                            <div class="receipt-footer">
+                                <p>Thank you for choosing Anda Public Beach Resort. We hope you have a great experience!</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                `);
+
+                printWindow.document.close();
+                printWindow.print();
+            });
+
+        });
+
+    </script>
+    
+    
+
+{% endblock %}

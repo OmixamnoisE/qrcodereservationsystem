@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Beach{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h2 class="text-xl font-semibold mb-4">Select the Beach to Manage</h2>
+    <form method="GET" action="{% url 'beach_dashboard' %}">
+        <label for="beach_id" class="block mb-2">Choose a Beach:</label>
+        {% if assigned_beaches %}
+            <select name="beach_id" id="beach_id" class="block w-full p-2 mb-4 border">
+                {% for beach in assigned_beaches %}
+                    <option value="{{ beach.id }}">{{ beach.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded">Proceed</button>
+        {% else %}
+            <p class="text-red-500">No available beaches to select.</p>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

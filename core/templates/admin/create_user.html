@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Create User Account{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'admin/admin_sidebar.html' %}  
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <div class="section bg-white p-6 rounded-lg shadow-lg mb-8 max-w-3xl mx-auto">
+            <h2 class="text-2xl font-semibold text-blue-700 mb-6 text-center">Create User Account</h2>
+
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 mb-4 bg-green-100 text-green-800 border border-green-300 rounded">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'create_user' %}" enctype="multipart/form-data" id="create-user-form">
+                {% csrf_token %}
+
+                <!-- First Name -->
+                <div class="mb-6">
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <input type="text" id="first_name" name="first_name" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.first_name }}" required>
+                </div>
+
+                <!-- Middle Name (Optional) -->
+                <div class="mb-6">
+                    <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
+                    <input type="text" id="middle_name" name="middle_name" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.middle_name }}">
+                </div>
+
+                <!-- Last Name -->
+                <div class="mb-6">
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.last_name }}" required>
+                </div>
+
+                <!-- Nickname (Optional) -->
+                <div class="mb-6">
+                    <label for="nickname" class="block text-sm font-medium text-gray-700 mb-2">Nickname</label>
+                    <input type="text" id="nickname" name="nickname" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.nickname }}" placeholder="Enter your nickname">
+                </div>
+
+                <!-- Username -->
+                <div class="mb-6">
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" name="username" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.username }}" required>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-4 py-2" required>
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="mb-6">
+                    <label for="profile_picture" class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white cursor-pointer">
+                </div>
+
+
+                <!-- Contact Number -->
+                <div class="mb-6">
+                    <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                    <input type="text" id="contact_number" name="contact_number" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.contact_number }}" required pattern="\d{11}" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11)">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="button" id="open-modal" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <!-- Success Message -->
+            <div id="success-message" class="hidden mt-6 text-green-600 text-center">
+                <p>Account created successfully.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Confirm Account Creation</h3>
+        <p class="mb-4 text-sm text-gray-600">Are you sure you want to create this user account?</p>
+        <div class="flex justify-end space-x-4">
+            <button id="close-modal" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">No</button>
+            <button id="confirm-create" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Yes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('open-modal').addEventListener('click', function() {
+        document.getElementById('confirmation-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-modal').addEventListener('click', function() {
+        document.getElementById('confirmation-modal').classList.add('hidden');
+    });
+
+    document.getElementById('confirm-create').addEventListener('click', function() {
+        document.getElementById('create-user-form').submit();
+        document.getElementById('confirmation-modal').classList.add('hidden');
+    });
+</script>
+{% endblock %}

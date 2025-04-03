@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Beach QR Scanner{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'beach/beach_sidebar.html' %}  <!-- Include Sidebar -->
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <h1 class="text-xl font-bold text-center text-blue-700 mb-6">QR Code Scanner</h1>
+
+        <!-- QR Code Scanner Display (Smaller Size) -->
+        <div class="flex justify-center">
+            <div id="reader" class="border rounded-lg w-64 h-50"></div>
+        </div>
+
+        <!-- Scanned QR Code Result -->
+        <p id="result" class="mt-4 text-lg font-medium text-blue-600 text-center"></p>
+
+        <!-- Control Buttons -->
+        <div class="mt-4 flex justify-center gap-4">
+            <button id="startScanner" class="bg-green-500 text-white px-4 py-2 rounded-lg">Start Scanning</button>
+            <button id="stopScanner" class="bg-red-500 text-white px-4 py-2 rounded-lg hidden">Stop Scanning</button>
+        </div>
+
+        <div id="reservationTableContainer" class="mt-6">
+            <h2 class="text-xl font-bold text-center text-blue-700 mb-4">Tourist Reservations</h2>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border border-gray-300 p-2">Beach</th>
+                        <th class="border border-gray-300 p-2">Date</th>
+                        <th class="border border-gray-300 p-2">People</th>
+                        <th class="border border-gray-300 p-2">Payment</th>
+                        <th class="border border-gray-300 p-2">Status</th>
+                        <th class="border border-gray-300 p-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="reservationTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let scanner = new Html5Qrcode("reader");
+        let lastScannedQrCode = null;  // Define this variable
+
+        document.getElementById("startScanner").addEventListener("click", function () {
+            scanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 180 },
+                (decodedText) => {
+                    scanner.stop();
+                    document.getElementById("reader").innerHTML = "";
+                    lastScannedQrCode = decodedText; // Store the last scanned QR code
+                    redirectToTokenPage(decodedText);  // Redirect to the correct page with token
+                },
+                (errorMessage) => {
+                    console.error("Error scanning QR code:", errorMessage);
+                }
+            );
+        });
+
+        // Redirect to the beach_scanner_token view with the scanned token
+        function redirectToTokenPage(qrCode) {
+            console.log("Scanned QR Code:", qrCode);  // Debugging
+
+            if (!qrCode) {
+                alert("Error: No QR code detected!");
+                return;
+            }
+
+            let extractedToken;
+
+            // Extract token from URL if QR code is a link
+            try {
+                let url = new URL(qrCode);
+                let pathSegments = url.pathname.split("/").filter(seg => seg !== "");
+                extractedToken = pathSegments.pop();  // Get last segment (Token)
+            } catch (error) {
+                console.warn("QR Code is not a URL, using raw value.");
+                extractedToken = qrCode.trim();
+            }
+
+            console.log("Extracted Token:", extractedToken);  // Debugging
+
+            // Redirect to the beach_scanner_token page with the extracted token
+            window.location.href = `/beach_scanner_token/${extractedToken}/`;
+        }
+        
+    });
+
+</script>
+
+{% endblock %}

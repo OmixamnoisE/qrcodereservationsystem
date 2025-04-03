@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Tourist Reservations{% endblock %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'beach/beach_sidebar.html' %}
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <h1 class="text-xl font-bold text-center text-blue-700 mb-6">Tourist Reservations</h1>
+
+        <!-- Tourist Information -->
+        <h2 class="text-lg font-semibold text-blue-700 mb-4">Tourist: {{ tourist.nickname }}</h2>
+        
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold text-blue-700 mb-4">Reservations</h3>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border border-gray-300 p-2">Beach</th>
+                        <th class="border border-gray-300 p-2">Date</th>
+                        <th class="border border-gray-300 p-2">People</th>
+                        <th class="border border-gray-300 p-2">Payment</th>
+                        <th class="border border-gray-300 p-2">Status</th>
+                        <th class="border border-gray-300 p-2">Approve</th>
+                        <th class="border border-gray-300 p-2">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                    <tr>
+                        <td class="border border-gray-300 p-2">{{ reservation.beach.name }}</td>
+                        <td class="border border-gray-300 p-2">{{ reservation.date_reserved }}</td>
+                        <td class="border border-gray-300 p-2">{{ reservation.num_people }}</td>
+                        
+                        <!-- Payment Method -->
+                        <td class="border border-gray-300 p-2">
+                            {% if reservation.payment %}
+                                {{ reservation.payment.get_payment_method_display }}  <!-- Displays 'Cash' or 'GCash' -->
+                            {% else %}
+                                Not Paid
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Payment Status -->
+                        <td class="border border-gray-300 p-2">
+                            {% if reservation.payment %}
+                                {{ reservation.payment.get_status_display }}  <!-- Displays 'Pending', 'Paid', 'Failed' -->
+                            {% else %}
+                                Not Paid
+                            {% endif %}
+                        </td>
+
+                        <td class="border border-gray-300 p-2">
+                            <form id="approval-form-{{ reservation.id }}" action="{% url 'toggle_approval' reservation.id %}" method="POST">
+                                {% csrf_token %}
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" id="toggle_approval_{{ reservation.id }}" 
+                                           onclick="confirmApprovalChange(event, {{ reservation.id }})"
+                                           class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-gray-300 cursor-pointer"
+                                           {% if reservation.approved %}checked{% endif %}
+                                           {% if reservation.approved %}disabled{% endif %}>  <!-- Disable if approved -->
+                                    <label for="toggle_approval_{{ reservation.id }}" 
+                                           class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer bg-gray-300"></label>
+                                </div>
+                            </form>
+                        </td>
+                        
+                        <td class="border border-gray-300 p-2">
+                            {% if reservation.payment %}
+                                {{ reservation.payment.amount | floatformat:2|intcomma }}  <!-- Displays the payment amount -->
+                            {% else %}
+                                0.00  <!-- If not paid -->
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center p-4">No reservations found for this tourist.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="text-sm text-gray-700">
+                    Page {{ reservations.number }} of {{ reservations.paginator.num_pages }}
+                </div>
+                <div class="flex space-x-2">
+                    {% if reservations.has_previous %}
+                        <a href="?page=1" class="bg-blue-500 text-white py-2 px-4 rounded">First</a>
+                        <a href="?page={{ reservations.previous_page_number }}" class="bg-blue-500 text-white py-2 px-4 rounded">Previous</a>
+                    {% endif %}
+                    {% if reservations.has_next %}
+                        <a href="?page={{ reservations.next_page_number }}" class="bg-blue-500 text-white py-2 px-4 rounded">Next</a>
+                        <a href="?page={{ reservations.paginator.num_pages }}" class="bg-blue-500 text-white py-2 px-4 rounded">Last</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% block extra_styles %}
+<style>
+    /* Toggle styles */
+    .toggle-checkbox:checked {
+        right: 0;
+        background-color: #4CAF50; /* Green for active state */
+    }
+    
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: #4CAF50; /* Green for active state */
+    }
+
+    .toggle-label {
+        background-color: #ccc; /* Light gray background for inactive state */
+    }
+
+    .toggle-text {
+        left: 0;
+        color: #333;
+        text-align: center;
+        width: 100%;
+        transition: all 0.2s ease;
+        position: absolute;
+        top: -20px; /* Move the text up a little bit */
+    }
+
+    .toggle-checkbox:checked ~ .toggle-text {
+        right: 0;
+        color: green;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function confirmApprovalChange(event, reservationId) {
+        // Prevent the checkbox from automatically submitting the form
+        event.preventDefault();
+
+        // Get the checkbox element
+        var checkbox = document.getElementById('toggle_approval_' + reservationId);
+
+        // Ask for confirmation before changing approval status
+        var confirmation = confirm('Are you sure you want to approve this reservation?');
+
+        // If the user confirms, submit the form. Otherwise, revert the checkbox state
+        if (confirmation) {
+            // Submit the form
+            document.getElementById('approval-form-' + reservationId).submit();
+        } else {
+            // Revert the checkbox to its original state (unchecked if previously checked)
+            checkbox.checked = !checkbox.checked;
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %}

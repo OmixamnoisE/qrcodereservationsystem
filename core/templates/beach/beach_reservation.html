@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Beach Reservation Dashboard{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'beach/beach_sidebar.html' %}  <!-- Include Sidebar -->
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <div id="manageTourists" class="section mb-8">
+            <h2 class="text-2xl font-semibold text-blue-700 text-center">Reservations</h2>
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table class="w-full text-sm text-left rtl:text-right text-blue-100 dark:text-blue-100">
+                    <thead class="text-xs text-white uppercase bg-blue-600 dark:text-white">
+                        <tr>
+                            <th class="px-6 py-3">Name</th>
+                            <th class="px-6 py-3">Email</th>
+                            <th class="px-6 py-3">Contact Number</th>
+                            <th class="px-6 py-3">Date</th>
+                            <th class="px-6 py-3">People</th>
+                            <th class="px-6 py-3">Total Price</th>
+                            <th class="px-6 py-3">Payment Method</th>
+                            <th class="px-6 py-3">Payment Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                        <tr class="bg-blue-500 border-b border-blue-400">
+                            <td class="px-6 py-4 font-medium text-blue-50 whitespace-nowrap dark:text-blue-100">
+                                {{ reservation.tourist.name }}
+                            </td>
+                            <td class="px-6 py-4">{{ reservation.tourist.email }}</td>
+                            <td class="px-6 py-4">{{ reservation.tourist.contact_number }}</td>
+                            <td class="px-6 py-4">{{ reservation.date_reserved }}</td>
+                            <td class="px-6 py-4">{{ reservation.num_people }}</td>
+                            <td class="px-6 py-4">₱{{ reservation.total_price }}</td>
+                            <td class="px-6 py-4">{{ reservation.payment_method|capfirst }}</td>
+                            <td class="px-6 py-4">
+                                {{ reservation.payment_status|capfirst }}
+                                {% if reservation.payment_method == "cash" and reservation.payment_status == "pending" %}
+                                    <form method="POST" action="{% url 'confirm_cash_payment' reservation.id %}" class="confirm-payment-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded">Confirm Payment</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">No reservations found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Auto Refresh After Payment Confirmation -->
+<script>
+    document.querySelectorAll('.confirm-payment-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent default form submission
+            fetch(this.action, {
+                method: "POST",
+                body: new FormData(this),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();  // ✅ Refresh the page after success
+                }
+            }).catch(error => console.error("Error:", error));
+        });
+    });
+</script>
+{% endblock %}

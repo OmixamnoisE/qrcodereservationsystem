@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Tourist Management{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'admin/admin_sidebar.html' %}  
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <h2 class="text-2xl font-semibold text-blue-700 text-center mb-4">Manage Tourists</h2>
+
+        <div class="relative overflow-x-auto bg-white shadow-md rounded-lg p-4">
+            <table class="w-full text-sm text-gray-800">
+                <thead class="bg-blue-600 text-white text-left">
+                    <tr>
+                        <th class="px-4 py-2">Name</th>
+                        <th class="px-4 py-2">Age</th>
+                        <th class="px-4 py-2">Gender</th> 
+                        <th class="px-4 py-2">Type</th>
+                        <th class="px-4 py-2">Country</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tourist in tourists %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2">{{ tourist.fullname }}</td>
+                        <td class="px-4 py-2">{{ tourist.age }}</td>
+                        <td class="px-4 py-2 capitalize">
+                            {% if tourist.gender %}
+                                {{ tourist.gender }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2 capitalize">{{ tourist.tourist_type }}</td>
+                        <td class="px-4 py-2">{{ tourist.country }}</td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-gray-500">No tourists found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div id="qrModal" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center hidden">
+    <div class="relative bg-white p-6 rounded-lg shadow-lg text-center">
+        <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl" onclick="closeQRModal()">✖</button>
+        <img id="modalQR" src="" alt="QR Code" class="max-w-full h-auto rounded-lg">
+    </div>
+</div>
+
+<!-- JavaScript for QR Modal -->
+<script>
+    function openQRModal(imageUrl) {
+        document.getElementById("modalQR").src = imageUrl;
+        document.getElementById("qrModal").classList.remove("hidden");
+    }
+    
+    function closeQRModal() {
+        document.getElementById("qrModal").classList.add("hidden");
+    }
+
+    // Close modal when clicking outside the QR code
+    document.getElementById("qrModal").addEventListener("click", function(event) {
+        if (event.target === this) {
+            closeQRModal();
+        }
+    });
+</script>
+
+{% endblock %}

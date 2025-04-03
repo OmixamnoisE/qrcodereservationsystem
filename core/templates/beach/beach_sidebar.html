@@ -1,0 +1,150 @@
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-300 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
+   <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+      <ul class="space-y-2 font-medium">
+        <li>
+            <a href="{% url 'beach_dashboard' %}"
+               class="relative flex items-center p-2 rounded-lg 
+                      text-gray-900 dark:text-white 
+                      group 
+                      {% if request.path == '/beach_dashboard/' %}
+                          bg-blue-200 text-blue-800 font-bold dark:bg-blue-800 dark:text-blue-400
+                      {% else %}
+                          hover:bg-blue-200 hover:text-blue-800 dark:hover:bg-blue-800 dark:hover:text-blue-400
+                      {% endif %}">
+                
+                <!-- SVG Icon -->
+                <svg class="w-5 h-5 text-gray-500 transition duration-75 
+                            {% if request.path == '/beach_dashboard/' %}
+                                text-blue-800 dark:text-blue-400
+                            {% else %}
+                                group-hover:text-blue-800 dark:group-hover:text-blue-400
+                            {% endif %}"
+                     aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
+                    <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"/>
+                    <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
+                </svg>
+        
+                <span class="ml-3">Dashboard</span>
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        
+         <li>
+            <a href="{% url 'beach_reservation' %}" class="relative flex items-center p-2 rounded-lg text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                <svg class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M16 0H4a2 2 0 0 0-2 2v1H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM13.929 17H7.071a.5.5 0 0 1-.5-.5 3.935 3.935 0 1 1 7.858 0 .5.5 0 0 1-.5.5Z"/>
+                </svg>
+                <span class="ml-3">Create Reservation</span>
+            </a>
+         </li>         
+         <li>
+            <button onclick="openProfileModal()" 
+                    class="relative flex items-center p-2 rounded-lg text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group w-full">
+                    <svg class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M3.559 4.544c.355-.35.834-.544 1.33-.544H19.11c.496 0 .975.194 1.33.544.356.35.559.829.559 1.331v9.25c0 .502-.203.981-.559 1.331-.355.35-.834.544-1.33.544H15.5l-2.7 3.6a1 1 0 0 1-1.6 0L8.5 17H4.889c-.496 0-.975-.194-1.33-.544A1.868 1.868 0 0 1 3 15.125v-9.25c0-.502.203-.981.559-1.331ZM7.556 7.5a1 1 0 1 0 0 2h8a1 1 0 0 0 0-2h-8Zm0 3.5a1 1 0 1 0 0 2H12a1 1 0 1 0 0-2H7.556Z" clip-rule="evenodd"/>
+                      </svg>
+                      
+                <span class="ml-3">Edit Profile</span>
+            </button>
+        </li>              
+         <li>
+          <a href="{% url 'beach_qrscanner' %}" class="relative flex items-center p-2 rounded-lg text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group
+              {% if request.path == '/beach_qrscanner/' %}text-blue-500 font-semibold{% endif %}
+              after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
+              <svg class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+               <path fill-rule="evenodd" d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z" clip-rule="evenodd"/>
+               <path fill-rule="evenodd" d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" clip-rule="evenodd"/>
+               <path d="M10.5 14.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
+             </svg>
+             <span class="ml-3">QR Scanner</span>
+          </a>
+       </li>
+      </ul>
+   </div>
+</aside>
+
+<!-- Edit Profile Modal -->
+<div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
+   <div class="bg-white p-6 rounded-lg w-1/3 relative">
+       <h2 class="text-lg font-semibold mb-4">Edit Profile</h2>
+
+       <form method="POST" action="{% url 'edit_collector_profile' collector.id %}" enctype="multipart/form-data" id="edit-profile-form">
+           {% csrf_token %}
+
+           <!-- Nickname -->
+           <div class="mb-4">
+               <label for="nickname" class="block text-gray-700 mb-2">Nickname:</label>
+               <input type="text" name="nickname" id="nickname" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring" required>
+           </div>
+
+           <!-- Full Name -->
+           <div class="mb-4">
+               <label for="full_name" class="block text-gray-700 mb-2">Full Name:</label>
+               <input type="text" name="full_name" id="full_name" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring" required>
+           </div>
+
+           <!-- Contact Number -->
+           <div class="mb-4">
+               <label for="contact_number" class="block text-gray-700 mb-2">Contact Number:</label>
+               <input type="text" name="contact_number" id="contact_number" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring"
+                   pattern="\d{11}" maxlength="11" required
+                   oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11)">
+           </div>
+
+           <div class="mb-4">
+            <label for="profile_picture" class="block text-gray-700 mb-2">Profile Picture:</label>
+            {% if collector.profile_picture %}
+                <img src="{{ collector.profile_picture.url }}" alt="Profile Picture" class="w-24 h-24 object-cover mb-2 rounded-full">
+            {% endif %}
+            <input type="file" name="profile_picture" id="profile_picture" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring">
+        </div>
+
+           <!-- Buttons -->
+           <div class="flex justify-end space-x-4">
+               <button type="button" onclick="closeProfileModal()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+               <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800">Save</button>
+           </div>
+       </form>
+   </div>
+</div>
+
+<!-- Hidden Fields for Data Fetching -->
+<div id="displayFullName" class="hidden">{{ collector.fullname }}</div>
+<div id="displayNickname" class="hidden">{{ collector.nickname }}</div>
+<div id="displayContactNumber" class="hidden">{{ collector.contact_number }}</div>
+<img id="displayProfilePicture" src="{{ collector.qr_code }}" alt="Profile Picture" class="hidden">
+
+<script>
+   function openProfileModal() {
+       const modal = document.getElementById('profileModal');
+       modal.classList.remove('hidden');
+
+       // Fetch and assign profile data
+       const nickname = document.getElementById('displayNickname')?.textContent.trim();
+       const fullName = document.getElementById('displayFullName')?.textContent.trim();
+       const contactNumber = document.getElementById('displayContactNumber')?.textContent.trim();
+       const profilePicUrl = document.getElementById('displayProfilePicture')?.src;
+
+       // Assign values to inputs
+       if (nickname) document.getElementById('nickname').value = nickname;
+       if (fullName) document.getElementById('full_name').value = fullName;
+       if (contactNumber) document.getElementById('contact_number').value = contactNumber;
+       if (profilePicUrl) document.getElementById('profile_picture_preview').src = profilePicUrl;
+   }
+
+   function closeProfileModal() {
+       document.getElementById('profileModal').classList.add('hidden');
+   }
+
+   function previewProfilePicture(event) {
+       const profilePicturePreview = document.getElementById('profile_picture_preview');
+       const file = event.target.files[0];
+       if (file) {
+           profilePicturePreview.src = URL.createObjectURL(file);
+       }
+   }
+</script>

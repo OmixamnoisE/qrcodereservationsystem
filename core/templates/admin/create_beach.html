@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Beach{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'admin/admin_sidebar.html' %}  
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <div class="section bg-white p-6 rounded-lg shadow-lg mb-8 max-w-3xl mx-auto">
+            <h2 class="text-2xl font-semibold text-blue-700 mb-6 text-center">Create Beach</h2>
+
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 mb-4 bg-green-100 text-green-800 border border-green-300 rounded">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'create_beach' %}" enctype="multipart/form-data" id="create-beach-form">
+                {% csrf_token %}
+
+                <!-- Beach Name -->
+                <div class="mb-6">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Beach Name</label>
+                    <input type="text" id="name" name="name" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.name }}" required>
+                </div>
+
+                <!-- Beach Location -->
+                <div class="mb-6">
+                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Beach Location</label>
+                    <input type="text" id="location" name="location" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.location }}" required>
+                </div>
+
+                <!-- Beach Description -->
+                <div class="mb-6">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Beach Description</label>
+                    <textarea id="description" name="description" rows="4" class="w-full border border-gray-300 rounded-md px-4 py-2" placeholder="Describe the beach, amenities, and attractions...">{{ request.POST.description }}</textarea>
+                </div>
+
+                <!-- Beach Image -->
+                <div class="mb-6">
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Beach Image (Optional)</label>
+                    <input type="file" id="image" name="image" accept="image/*" class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white cursor-pointer">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="button" id="open-modal" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        Create Beach
+                    </button>
+                </div>
+            </form>
+
+            <!-- Success Message -->
+            <div id="success-message" class="hidden mt-6 text-green-600 text-center">
+                <p>Beach created successfully.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="confirmation-modal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Confirm Beach Creation</h3>
+        <p class="mb-4 text-sm text-gray-600">Are you sure you want to create this beach?</p>
+        <div class="flex justify-end space-x-4">
+            <button id="close-modal" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">No</button>
+            <button id="confirm-create" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Yes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('open-modal').addEventListener('click', function() {
+        document.getElementById('confirmation-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-modal').addEventListener('click', function() {
+        document.getElementById('confirmation-modal').classList.add('hidden');
+    });
+
+    document.getElementById('confirm-create').addEventListener('click', function() {
+        document.getElementById('create-beach-form').submit();
+        document.getElementById('confirmation-modal').classList.add('hidden');
+    });
+</script>
+{% endblock %}

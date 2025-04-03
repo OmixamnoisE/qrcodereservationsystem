@@ -1,0 +1,71 @@
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-300 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700">
+    <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+        <ul class="space-y-2 font-medium">
+            <!-- Dashboard Link -->
+            <li>
+                <a href="{% url 'admin_dashboard' %}" 
+                   class="relative flex items-center p-2 rounded-lg transition 
+                      {% if request.path == '/admin/dashboard/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
+                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
+                    <!-- SVG Icon -->
+                    <span class="ml-3">Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Create User Link -->
+            <li>
+                <a href="{% url 'create_user' %}" 
+                   class="relative flex items-center p-2 rounded-lg transition 
+                      {% if request.path == '/admin/create-user/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
+                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
+                    <!-- SVG Icon -->
+                    <span class="ml-3">Create User</span>
+                </a>
+            </li>
+
+            <!-- Manage Users Link -->
+            <li>
+                <a href="{% url 'manage_users' %}" 
+                   class="relative flex items-center p-2 rounded-lg transition 
+                      {% if request.path == '/admin/manage-users/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
+                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
+                    <!-- SVG Icon -->
+                    <span class="ml-3">Manage Users</span>
+                </a>
+            </li>
+
+            <!-- Create Beach Link -->
+            <li>
+                <a href="{% url 'create_beach' %}" 
+                   class="relative flex items-center p-2 rounded-lg transition 
+                      {% if request.path == '/admin/create-beach/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
+                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
+                    <!-- SVG Icon -->
+                    <span class="ml-3">Create Beach</span>
+                </a>
+            </li>
+
+            <!-- Manage Beaches Link -->
+            <li>
+                <a href="{% url 'manage_beaches' %}" 
+                   class="relative flex items-center p-2 rounded-lg transition 
+                      {% if request.path == '/admin/manage-beaches/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
+                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
+                    <!-- SVG Icon -->
+                    <span class="ml-3">Manage Beaches</span>
+                </a>
+            </li>
+
+            <!-- Manage Tourists Link -->
+            <li>
+                <a href="{% url 'manage_tourists' %}" 
+                   class="relative flex items-center p-2 rounded-lg transition 
+                      {% if request.path == '/admin/manage-tourists/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
+                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
+                    <!-- SVG Icon -->
+                    <span class="ml-3">Manage Tourists</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>

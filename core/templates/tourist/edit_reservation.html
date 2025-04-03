@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Reservation{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<!-- templates/tourist/edit_reservation.html -->
+<div class="container">
+    <h2>Edit Reservation</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="date_reserved">Reservation Date</label>
+            <input type="date" id="date_reserved" name="date_reserved" value="{{ reservation.date_reserved }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="num_people">Number of People</label>
+            <input type="number" id="num_people" name="num_people" value="{{ reservation.num_people }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Transaction History{% endblock %}
+
+{% load static %}
+
+{% load humanize %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'cashier/cashier_sidebar.html' %}
+    <div class="flex-1 p-6 sm:ml-64">
+        <h2 class="text-2xl font-semibold mb-4 text-blue-700 text-center">Transaction History</h2>
+
+        <h3 class="text-xl font-semibold mb-2 text-blue-600">GCash Transactions</h3>
+        
+        <table class="w-full bg-white border border-gray-300 rounded-lg shadow-md mb-6">
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="py-2 px-4">Date</th>
+                    <th class="py-2 px-4">Gcash Reference</th>
+                    <th class="py-2 px-4">Amount</th>
+                    <th class="py-2 px-4">Nickname</th>
+                    <th class="py-2 px-4">Payment Method</th>
+                    <th class="py-2 px-4">Status</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                {% for payment in gcash_payments %}
+                {% if payment.payment_method == "gcash" %}
+                <tr class="border-t border-gray-200 text-center">
+                    <td class="px-3 py-2">{{ payment.created_at|date:"F j, Y" }}</td>
+                    <td class="px-3 py-2">{{ payment.gcash_reference_number }}</td>
+                    <td class="px-3 py-2 font-semibold text-green-600">₱{{ payment.amount|intcomma }}</td>
+                    <td class="px-3 py-2">{{ payment.reservation.tourist.nickname|default:"N/A" }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ payment.get_payment_method_display }}</td>
+                    <td class="px-3 py-2">
+                        <span class="px-3 py-1 rounded text-white text-xs font-semibold
+                            {% if payment.status == 'paid' %} bg-green-500
+                            {% elif payment.status == 'pending' %} bg-yellow-700
+                            {% else %} bg-red-500
+                            {% endif %}">
+                            {{ payment.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% endif %}
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-gray-500">No GCash transactions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="total-amount mt-4">
+            <h3 class="text-xl font-semibold">Total Amount: ₱{{ total_gcash_amount|floatformat:2|intcomma }}</h3>
+        </div>
+
+        
+        <div class="max-w-4xl mx-auto mt-6 bg-white p-6 rounded shadow-md">
+            <form method="GET" action="{% url 'cashier_transactions' %}" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                
+                <div>
+                    <label for="search_beach" class="block text-gray-700 text-sm">Select Beach</label>
+                    <select id="search_beach" name="search_beach" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
+                        <option value="">All Beaches</option>
+                        {% for beach in beaches %}
+                            <option value="{{ beach.id }}" {% if request.GET.search_beach == beach.id|stringformat:"s" %}selected{% endif %}>
+                                {{ beach.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="search_payment_status" class="block text-gray-700 text-sm">Select Payment Status</label>
+                    <select id="search_payment_status" name="search_payment_status" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
+                        <option value="">All Payment Statuses</option>
+                        <option value="paid" {% if request.GET.search_payment_status == 'paid' %}selected{% endif %}>Paid</option>
+                        <option value="pending" {% if request.GET.search_payment_status == 'pending' %}selected{% endif %}>Pending</option>
+                        <!-- Add other statuses if needed -->
+                    </select>
+                </div>
+
+                <div>
+                    <label for="search_date" class="block text-gray-700 text-sm">Filter by Date</label>
+                    <input type="date" id="search_date" name="search_date" value="{{ request.GET.search_date }}" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
+                </div>
+
+                <div>
+                    <label for="search_approved_by" class="block text-gray-700 text-sm">Select Collector (Approved By)</label>
+                    <select id="search_approved_by" name="search_approved_by" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
+                        <option value="">All Collectors</option>
+                        {% for collector in collectors %}
+                            <option value="{{ collector.id }}" {% if request.GET.search_approved_by == collector.id|stringformat:"s" %}selected{% endif %}>
+                                {{ collector.first_name }} {{ collector.last_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-span-1 md:col-span-4">
+                    <button type="submit" class="w-full bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
+                        🔍 Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-4 text-blue-600">Cash Transactions</h3>
+        <table class="w-full bg-white border border-gray-300 rounded-lg shadow-md">
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="py-2 px-4">Date</th>
+                    <th class="py-2 px-4">Amount</th>
+                    <th class="py-2 px-4">Nickname</th>
+                    <th class="py-2 px-4">Selected Beach</th>
+                    <th class="py-2 px-4">Payment Method</th>
+                    <th class="py-2 px-4">Status</th>
+                    <th class="py-2 px-4">Action</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                {% for payment in cash_payments %}
+                {% if payment.payment_method == "cash" %}
+                <tr class="border-t border-gray-200 text-center">
+                    <td class="px-3 py-2">{{ payment.created_at|date:"F j, Y" }}</td>
+                    <td class="px-3 py-2 font-semibold text-green-600">₱{{ payment.amount|intcomma }}</td>
+                    <td class="px-3 py-2">{{ payment.reservation.tourist.nickname|default:"N/A" }}</td>
+                    <td class="px-3 py-2">{{ payment.reservation.beach.name|default:"N/A" }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ payment.get_payment_method_display }}</td>
+                    <td class="px-3 py-2">
+                        <span class="px-3 py-1 rounded text-white text-xs font-semibold
+                            {% if payment.status == 'paid' %} bg-green-500
+                            {% elif payment.status == 'pending' %} bg-yellow-700
+                            {% else %} bg-red-500
+                            {% endif %}">
+                            {{ payment.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-3 py-2">
+                        {% if payment.reservation.approved_by %}
+                            {{ payment.reservation.approved_by.first_name }} {{ payment.reservation.approved_by.last_name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-gray-500">No cash transactions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination Controls -->
+        <div class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-700">
+                Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </div>
+            <div class="flex space-x-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Previous</a>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Last</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="total-amount mt-4">
+            <h3 class="text-xl font-semibold">Total Amount: ₱{{ total_cash_amount|floatformat:2|intcomma }}</h3>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

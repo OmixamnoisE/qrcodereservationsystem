@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Cashier Dashboard{% endblock %}
+
+{% load static %}
+
+{% load humanize %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'cashier/cashier_sidebar.html' %}
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <h1 class="text-3xl font-semibold mb-6">Cashier Dashboard</h1>
+
+        <form method="GET" class="mb-6">
+            <div class="flex space-x-4">
+                <div class="flex-1">
+                    <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ form.start_date.value|default_if_none:'' }}" class="mt-1 p-2 border rounded w-full">
+                </div>
+                <div class="flex-1">
+                    <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ form.end_date.value|default_if_none:'' }}" class="mt-1 p-2 border rounded w-full">
+                </div>
+                <div class="flex-1">
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded w-full mt-6">Apply Filter</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Dashboard Overview -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="bg-white p-4 shadow rounded text-center">
+                <h3 class="text-gray-600 text-sm">Total Revenue</h3>
+                <p class="text-xl font-bold text-green-600">₱{{ total_revenue|default:"0.00" }}</p>
+            </div>
+            <div class="bg-white p-4 shadow rounded text-center">
+                <h3 class="text-gray-600 text-sm">Total Transactions</h3>
+                <p class="text-xl font-bold text-blue-600">{{ total_transactions|default:"0" }}</p>
+            </div>
+            <div class="bg-white p-4 shadow rounded text-center">
+                <h3 class="text-gray-600 text-sm">Pending Payments</h3>
+                <p class="text-xl font-bold text-yellow-500">{{ pending_payments|default:"0" }}</p>
+            </div>
+            <div class="bg-white p-4 shadow rounded text-center">
+                <h3 class="text-gray-600 text-sm">Paid Payments</h3>
+                <p class="text-xl font-bold text-green-500">{{ paid_payments|default:"0" }}</p>
+            </div>
+            <div class="bg-white p-4 shadow rounded text-center">
+                <h3 class="text-gray-600 text-sm">Today's Earnings</h3>
+                <p class="text-xl font-bold text-green-500">₱{{ todays_earnings|default:"0.00" }}</p>
+            </div>
+        </div>
+
+        <!-- Data Visualization: Sales Overview, Payment Methods, Earnings Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Sales Overview (Last 7 Days) -->
+            <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                <h2 class="text-lg font-semibold mb-2">Sales Overview (Last 7 Days)</h2>
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <!-- Payment Method Breakdown -->
+            <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                <h2 class="text-lg font-semibold mb-2">Payment Method Breakdown</h2>
+                <canvas id="paymentMethodChart"></canvas>
+            </div>
+
+            <!-- Earnings Breakdown -->
+            <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                <h2 class="text-lg font-semibold mb-2">Earnings Breakdown</h2>
+                <canvas id="earningsChart"></canvas>
+            </div>
+
+            <!-- Transaction Status -->
+            <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                <h2 class="text-lg font-semibold mb-2">Transaction Status</h2>
+                <canvas id="transactionStatusChart"></canvas>
+            </div>
+
+            <!-- Revenue by Payment Method -->
+            <div class="bg-white p-4 shadow rounded md:col-span-2" style="height: 300px;">
+                <h2 class="text-lg font-semibold mb-2 text-center">Revenue by Payment Method</h2>
+                <canvas id="revenueByMethodChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Action Buttons for Report and Transactions -->
+        <div class="p-4 mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- View Transactions Button -->
+            <a href="{% url 'cashier_transactions' %}" class="bg-gray-600 text-white p-3 rounded shadow hover:bg-gray-700 transition text-center">
+                View Transactions
+            </a>
+
+            
+            <a href="{% url 'cashier_generate_report' %}" class="bg-green-600 text-white p-3 rounded shadow hover:bg-green-700 transition text-center">
+                Generate PDF Report
+            </a>
+            
+            <!-- Alternatively, if using CSV: -->
+            <a href="{% url 'cashier_generate_csv_report' %}" class="bg-blue-600 text-white p-3 rounded shadow hover:bg-blue-700 transition text-center">
+                Generate CSV Report
+            </a>
+        </div>
+
+        <!-- Report Summary Section (details about the transaction summaries) -->
+        <div class="bg-white p-4 shadow rounded mt-6">
+            <h2 class="text-lg font-semibold mb-2">Report Summary</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="text-sm text-gray-600">Total Cash Transactions</h4>
+                    <p class="text-xl font-semibold">₱{{ total_cash|default:"0.00"|floatformat:2|intcomma }}</p>
+                </div>
+                <div>
+                    <h4 class="text-sm text-gray-600">Total GCash Transactions</h4>
+                    <p class="text-xl font-semibold">₱{{ total_gcash|default:"0.00"|floatformat:2|intcomma }}</p>
+                </div>
+                <div>
+                    <h4 class="text-sm text-gray-600">Total Pending Payments</h4>
+                    <p class="text-xl font-semibold">₱{{ total_pending|default:"0.00"|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1"></script>
+
+<script>
+    window.onload = function() {
+        const createChart = (id, type, data, options = {}) => {
+            const ctx = document.getElementById(id);
+            if (ctx) {
+                new Chart(ctx.getContext('2d'), { type, data, options: { responsive: true, maintainAspectRatio: false, ...options } });
+            }
+        };
+
+        // Utility function to parse all data to floats
+        const parseFloatData = (data) => data.map(value => parseFloat(value) || 0);
+
+        createChart('salesChart', 'line', {
+            labels: {{ sales_dates|safe }},
+            datasets: [{
+                label: 'Total Sales (₱)',
+                data: parseFloatData({{ sales_data|safe }}),
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                borderWidth: 2
+            }]
+        });
+
+        createChart('paymentMethodChart', 'doughnut', {
+            labels: ['Cash', 'GCash'],
+            datasets: [{
+                data: parseFloatData({{ payment_data|safe }}),
+                backgroundColor: ['#FFA500', '#007BFF']
+            }]
+        });
+
+        createChart('earningsChart', 'bar', {
+            labels: ['Daily', 'Monthly', 'Yearly'],
+            datasets: [{
+                label: 'Earnings (₱)',
+                data: parseFloatData({{ earnings_data|safe }}),
+                backgroundColor: ['#FF5733', '#FFC300', '#28A745']
+            }]
+        });
+
+        createChart('transactionStatusChart', 'bar', {
+            labels: ['Pending', 'Paid',],
+            datasets: [{
+                label: 'Transactions',
+                data: parseFloatData({{ transaction_status_data|safe }}),
+                backgroundColor: ['#FFC300', '#28A745', '#FF5733']
+            }]
+        });
+
+        createChart('revenueByMethodChart', 'line', {
+            labels: {{ revenue_method_dates|safe }},
+            datasets: [
+                {
+                    label: 'Cash Revenue (₱)',
+                    data: parseFloatData({{ cash_revenue_data|safe }}),
+                    borderColor: '#FFA500',
+                    backgroundColor: 'rgba(255, 165, 0, 0.2)',
+                    borderWidth: 2
+                },
+                {
+                    label: 'GCash Revenue (₱)',
+                    data: parseFloatData({{ gcash_revenue_data|safe }}),
+                    borderColor: '#007BFF',
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderWidth: 2
+                }
+            ]
+        });
+    };
+</script>
+
+{% endblock %}

@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Reservation{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="bg-gray-300 min-h-screen py-8">
+    <div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-semibold text-center text-blue-700 mb-4">Create Reservation</h1>
+    
+        <form method="POST" id="payment-form">
+            {% csrf_token %}
+            {% if messages %}
+                <ul class="messages" style="text-align: center;">
+                    {% for message in messages %}
+                        <li 
+                            {% if message.tags %}
+                                class="{{ message.tags }}"
+                                {% if message.tags == 'success' %}
+                                    style="color: green;"
+                                {% elif message.tags == 'error' %}
+                                    style="color: red;"
+                                {% endif %}
+                            {% endif %}
+                        >
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+    
+            <!-- Select Beach -->
+            <label class="block text-gray-700 font-medium mb-1">Select Beach</label>
+            <select name="beach" id="beach" class="w-full border rounded-lg px-3 py-2 mb-4" required>
+                <option value="" disabled selected>Select a beach</option>
+                {% for beach in beaches|dictsort:"name" %}
+                    <option value="{{ beach.id }}">{{ beach.name }}</option>
+                {% endfor %}
+            </select>
+        
+            <!-- Date of Visit -->
+            <label class="block text-gray-700 font-medium mb-1">Date of Visit</label>
+            <input type="date" name="date" id="date" class="w-full border rounded-lg px-3 py-2 mb-4" required>
+        
+            <!-- Number of People -->
+            <label class="block text-gray-700 font-medium mb-1">Number of People</label>
+            <input type="number" name="num_people" id="num_people" min="1" max="500" class="w-full border rounded-lg px-3 py-2 mb-4" required>
+    
+            <!-- Total Price -->
+            <label class="block text-gray-700 font-medium mb-1">Total Price</label>
+            <input type="text" id="total_price" class="w-full border rounded-lg px-3 py-2 mb-4 bg-gray-100" disabled>
+            <input type="hidden" name="total_price" id="total_price_hidden">
+        
+            <!-- ✅ FIX: Add Hidden Payment Method Input -->
+            <input type="hidden" name="payment_method" id="payment_method_hidden">
+        
+            <!-- Payment Method Buttons -->
+            <div class="mb-4">
+                <button type="button" id="cash-button" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg mb-2">Pay in Cash</button>
+                <button type="button" id="gcash-button" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg">Pay via GCash</button>
+            </div>
+        </form>    
+        <div class="mt-4 text-center">
+            <a href="{% url 'tourist_dashboard' %}" class="w-full bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                Back to Dashboard
+            </a>
+            
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-2xl font-semibold text-center text-blue-700 mb-4">Are you sure you want to reserve?</h2>
+            <p class="text-center text-gray-600 mb-4">You will be paying for the reservation at the destination directly to the collector.</p>
+            <div class="flex justify-between">
+                <button id="yes-button" class="w-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg">Yes, Confirm</button>
+                <button id="no-button" class="w-1/2 bg-gray-500 text-white px-4 py-2 rounded-lg">No, Go Back</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GCash Modal -->
+    <div id="gcash-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white p-5 rounded-lg shadow-lg w-full max-w-md">
+            <h2 class="text-xl font-bold text-center text-blue-700 mb-1">GCash Payment</h2>
+    
+            <div id="gcash-error-message" class="hidden bg-red-100 text-red-700 p-2 rounded mb-3 text-center"></div>
+    
+            <div class="text-center mb-1">
+                <p class="text-lg font-semibold">Total Amount:</p>
+                <p id="gcash-total-amount" class="text-xl font-bold text-green-600">₱0</p>
+                <p id="gcash-summary" class="text-sm text-gray-500">-</p>
+                <p id="gcash-selected-date" class="text-sm text-gray-500">-</p>
+            </div>
+            <div class="text-center mb-1">
+                <p>Scan to Pay:</p>
+                <img src="{% static 'images/Maximoqrcodepayment.jpg' %}" alt="GCash QR Code" class="mx-auto h-64 w-64">
+            </div>
+            <form id="gcash-form" method="POST" enctype="multipart/form-data" action="{% url 'create_reservation' %}">
+                {% csrf_token %}
+    
+                <!-- Hidden Inputs to Ensure Correct Data is Sent -->
+                <input type="hidden" name="beach" id="gcash-beach-hidden">
+                <input type="hidden" name="date" id="gcash-date-hidden">
+                <input type="hidden" name="num_people" id="gcash-num-people-hidden">
+                <input type="hidden" name="total_price" id="gcash-total-price-hidden">
+                <input type="hidden" name="payment_method" value="gcash">
+    
+                <!-- Upload Receipt Image -->
+                <label class="block text-sm font-medium text-gray-700 mb-1">Upload GCash Receipt</label>
+                <input type="file" id="gcash-receipt" accept="image/*" class="w-full border rounded-lg px-3 py-2 mb-2"
+                    onchange="extractReferenceNumber()" />
+    
+                <!-- Reference Number Input -->
+                <label class="block text-sm font-medium text-gray-700 mb-1">GCash Reference Number</label>
+                <input type="text" id="gcash_reference_number" name="gcash_reference_number" required pattern="\d{13}" maxlength="13"
+           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" placeholder="Auto-filled GCash Reference Number" readonly />
+    
+    
+                <!-- Confirm Payment Button -->
+                <button type="submit" class="w-full mt-3 bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600">
+                    Confirm Payment
+                </button>
+            </form>
+            <button id="back-button" class="w-full mt-2 bg-gray-500 text-white py-2 rounded-lg">Back</button>
+        </div>
+    </div>
+    
+    <!-- Error Modal -->
+    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
+            <h2 class="text-xl font-bold text-red-600 mb-4">Error</h2>
+            <p id="error-message" class="text-gray-700 mb-4">Something went wrong.</p>
+            <button id="error-close-button" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Close</button>
+        </div>
+    </div>
+    
+
+</div>
+<!-- Reservation Form -->
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const cashButton = document.getElementById("cash-button");
+        const gcashButton = document.getElementById("gcash-button");
+        const confirmationModal = document.getElementById("confirmation-modal");
+        const yesButton = document.getElementById("yes-button");
+        const noButton = document.getElementById("no-button");
+        const gcashModal = document.getElementById("gcash-modal");
+        const backButton = document.getElementById("back-button");
+        const paymentMethodInput = document.getElementById("payment_method_hidden");
+        const numPeopleInput = document.getElementById("num_people");
+        const totalPriceInput = document.getElementById("total_price");
+        const totalPriceHidden = document.getElementById("total_price_hidden");
+        const selectedBeachInput = document.getElementById("beach"); 
+        const dateInput = document.getElementById("date"); 
+        const gcashTotalAmount = document.getElementById("gcash-total-amount");
+        const gcashSummary = document.getElementById("gcash-summary");
+        const gcashSelectedDate = document.getElementById("gcash-selected-date");
+        const pricePerPerson = 30;
+
+        const gcashForm = document.querySelector("#gcash-modal form");
+        const referenceNumberInput = document.getElementById("reference_number");
+
+        const gcashBeachHidden = document.getElementById("gcash-beach-hidden");
+        const gcashDateHidden = document.getElementById("gcash-date-hidden");
+        const gcashNumPeopleHidden = document.getElementById("gcash-num-people-hidden");
+        const gcashTotalPriceHidden = document.getElementById("gcash-total-price-hidden");
+
+            
+        const errorMessageDiv = document.getElementById("gcash-error-message");
+
+        
+        numPeopleInput.addEventListener("input", function () {
+            const numPeople = parseInt(this.value) || 0;
+            const totalPrice = numPeople * pricePerPerson;
+            totalPriceInput.value = totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "";
+            totalPriceHidden.value = totalPrice;
+        });
+
+        if (!paymentMethodInput) {
+            console.error("payment_method_hidden input is missing from the form.");
+        }
+
+        if (cashButton) {
+            cashButton.addEventListener("click", function () {
+                console.log("Cash button clicked");
+                if (paymentMethodInput) {
+                    paymentMethodInput.value = "cash";
+                    confirmationModal.classList.remove("hidden");
+                }
+            });
+        } else {
+            console.error("cash-button not found!");
+        }
+
+        if (gcashButton) {
+            gcashButton.addEventListener("click", function () {
+                // Get the selected beach ID from the dropdown
+                const selectedBeachId = selectedBeachInput.value;  // Corrected to use selectedBeachInput.value
+                const numPeople = numPeopleInput.value;
+                const selectedDate = dateInput.value;
+                const totalPrice = totalPriceHidden.value;
+
+                if (!selectedBeachId || !numPeople || !selectedDate || !totalPrice) {
+                    alert("Please complete all reservation details.");
+                    return;
+                }
+
+                // Display GCash Payment Information
+                gcashTotalAmount.textContent = `₱${parseFloat(totalPrice).toLocaleString()}`;
+                gcashSummary.textContent = `${selectedBeachInput.options[selectedBeachInput.selectedIndex].text} - ${numPeople} People`;  // Display the name of the selected beach
+                gcashSelectedDate.textContent = `Date: ${selectedDate}`;
+
+                // Store the ID of the selected beach in the hidden input for submission
+                gcashBeachHidden.value = selectedBeachId;  // Store the ID of the selected beach, not the name
+                gcashDateHidden.value = selectedDate;
+                gcashNumPeopleHidden.value = numPeople;
+                gcashTotalPriceHidden.value = totalPrice;
+
+                gcashModal.classList.remove("hidden");
+            });
+        }
+
+
+        gcashForm.addEventListener("submit", function (event) {
+            if (!referenceNumberInput.value.match(/^\d{13}$/)) {
+                alert("Please enter a valid 13-digit GCash reference number.");
+                event.preventDefault();
+                return;
+            }
+
+            const formData = new FormData(gcashForm);
+
+            fetch(gcashForm.action, {
+                method: "POST",
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "/tourist-dashboard/";
+                    } else {
+                        errorMessageDiv.textContent = data.message;
+                        errorMessageDiv.classList.remove("hidden");
+                    }
+                })
+                .catch(error => console.error("Error submitting the form:", error));
+        });
+        
+        if (noButton) {
+            noButton.addEventListener("click", function () {
+                console.log("No button clicked - closing modal");
+                confirmationModal.classList.add("hidden");
+            });
+        } else {
+            console.error("no-button not found!");
+        }
+
+        if (yesButton) {
+            yesButton.addEventListener("click", function () {
+                console.log("Yes button clicked - submitting form");
+                confirmationModal.classList.add("hidden");
+                document.getElementById("payment-form").submit();
+            });
+        } else {
+            console.error("yes-button not found!");
+        }
+
+        if (backButton) {
+            backButton.addEventListener("click", function () {
+                console.log("GCash back button clicked - closing modal");
+                gcashModal.classList.add("hidden");
+            });
+        } else {
+            console.error("gcash-back-button not found!");
+        }
+    });
+
+
+    function extractReferenceNumber() {
+        const receiptInput = document.getElementById('gcash-receipt');
+        const referenceInput = document.getElementById('gcash_reference_number');
+
+        if (!receiptInput.files[0]) {
+            showErrorModal('Please upload a GCash receipt.');
+            return;
+        }
+
+        // Get CSRF token from the page
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        const formData = new FormData();
+        formData.append('gcash_receipt', receiptInput.files[0]);
+
+        fetch('/process-gcash-receipt/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken  // Add CSRF token to the request header
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.reference_number) {
+                referenceInput.value = data.reference_number;
+                referenceInput.setAttribute('readonly', true);  // Make the field non-editable
+            } else {
+                showErrorModal('Failed to extract a valid reference number.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorModal('An error occurred while processing the receipt.');
+        });
+    }
+    function showErrorModal(message) {
+        const errorModal = document.getElementById('error-modal');
+        const errorMessage = document.getElementById('error-message');
+
+        if (errorModal && errorMessage) {
+            errorMessage.textContent = message;
+            errorModal.classList.remove('hidden');
+
+            // Close modal when clicking the "Close" button
+            const closeButton = document.getElementById('error-close-button');
+            closeButton.onclick = () => errorModal.classList.add('hidden');
+        } else {
+            console.error("Error modal elements are missing.");
+        }
+    }
+    document.getElementById('num_people').addEventListener('input', function() {
+        if (this.value > 500) {
+            this.value = 500;  // Set the value to 200 if the user tries to exceed it
+        }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+        // Set the min attribute of the date input to today's date
+        const dateInput = document.getElementById("date");
+
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = (today.getMonth() + 1).toString().padStart(2, "0"); // Get month as two digits
+        const day = today.getDate().toString().padStart(2, "0"); // Get day as two digits
+        const formattedDate = `${year}-${month}-${day}`;
+
+        // Set the min attribute to today's date to restrict past dates
+        dateInput.setAttribute("min", formattedDate);
+
+        const nextYearDate = new Date();
+        nextYearDate.setFullYear(today.getFullYear() + 1);  // Add 1 year to the current date
+        const nextYearFormattedDate = `${nextYearDate.getFullYear()}-${(nextYearDate.getMonth() + 1).toString().padStart(2, "0")}-${nextYearDate.getDate().toString().padStart(2, "0")}`;
+
+        // Set the max attribute to one year ahead
+        dateInput.setAttribute("max", nextYearFormattedDate);
+    });
+
+
+</script>
+
+{% endblock %}

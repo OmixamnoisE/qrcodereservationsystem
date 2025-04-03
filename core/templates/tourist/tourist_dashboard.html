@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+
+{% block title %}Tourist Dashboard{% endblock %}
+
+{% load static %}
+
+{% load humanize %}
+
+{% block content %}
+<!-- Background Section -->
+<section class="relative bg-cover bg-center bg-no-repeat py-12 flex flex-col items-center justify-center text-center"
+    style="background-image: url('{% static 'images/anda.webp' %}'); height: 40vh;">
+    
+    <!-- <div class="absolute inset-0 bg-black bg-opacity-50"></div> 
+
+    <div class="relative z-10 text-white"> -->
+        <h2 class="text-3xl font-bold drop-shadow-lg">Welcome, {{ tourist.nickname }}!</h2>
+        <p class="mt-2 text-lg drop-shadow-lg mb-2">Experience the stunning Anda Public Beaches and Tourist Spots-book your reservations below!</p>
+        
+        <!-- Centered Buttons -->
+        <div class="mt-4 flex justify-center space-x-4">
+            <!-- Make Reservation Button -->
+            <a href="{% url 'create_reservation' %}" 
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
+                Create Reservation
+            </a>
+            
+            <!-- Edit Profile Button -->
+            <!-- Edit Profile Button (Fix) -->
+            <button onclick="openProfileModal()" 
+            class="bg-gray-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-700 transition">
+            Edit Profile
+            </button>
+
+        </div>
+    </div>
+</section>
+
+
+<div class="max-w-2xl mx-auto mt-6 bg-white p-6 rounded-lg shadow-md">
+    <form method="GET" action="{% url 'tourist_dashboard' %}" class="flex flex-col md:flex-row items-center gap-4">
+        
+        <!-- Beach Selection Dropdown -->
+        <div class="w-full md:w-1/3">
+            <label for="search_beach" class="block text-gray-700 font-medium text-sm text-center md:text-left">Select Beach</label>
+            <select id="search_beach" name="search_beach" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 text-center">
+                <option value="">All Beaches</option>
+                {% for beach in beaches %}
+                    <option value="{{ beach.id }}" {% if request.GET.search_beach == beach.id|stringformat:"s" %}selected{% endif %}>
+                        {{ beach.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Payment Method Dropdown -->
+        <div class="w-full md:w-1/3">
+            <label for="search_payment" class="block text-gray-700 font-medium text-sm text-center md:text-left">Payment Method</label>
+            <select id="search_payment" name="search_payment" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 text-center">
+                <option value="">All Payment Methods</option>
+                <option value="cash" {% if request.GET.search_payment == "cash" %}selected{% endif %}>Cash</option>
+                <option value="gcash" {% if request.GET.search_payment == "gcash" %}selected{% endif %}>GCash</option>
+            </select>
+        </div>
+
+        <!-- Search Button -->
+        <div class="w-full md:w-auto mt-5">
+            <button type="submit" class="w-full md:w-auto bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
+                🔍 Search
+            </button>
+        </div>
+    </form>
+</div>
+
+
+
+
+<!-- Reservations Table -->
+<div class="max-w-5xl mx-auto bg-white p-5 rounded-lg shadow mt-6">
+    <h3 class="text-xl font-semibold mb-4 text-blue-700">Your Reservations</h3>
+
+    {% if reservations %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 text-sm rounded-lg">
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="px-3 py-2">Booked On</th>
+                    <th class="px-3 py-2">Beach</th>
+                    <th class="px-3 py-2">Visit Date</th>
+                    <th class="px-3 py-2">People</th>
+                    <th class="px-3 py-2">Total</th>
+                    <th class="px-3 py-2">Payment</th>
+                    <th class="px-3 py-2">Status</th>
+                    <th class="px-3 py-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations %}
+                <tr class="border-t border-gray-200 text-center">
+                    <td class="px-3 py-2">{{ reservation.created_at|date:"M d, Y" }}</td>
+                    <td class="px-3 py-2">{{ reservation.beach.name }}</td>
+                    <td class="px-3 py-2">{{ reservation.date_reserved }}</td>
+                    <td class="px-3 py-2">{{ reservation.num_people }}</td>
+                    <td class="px-3 py-2 font-semibold">₱{{ reservation.total_price|intcomma }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ reservation.payment.get_payment_method_display }}</td>
+                    <td class="px-3 py-2">
+                        <span class="px-3 py-1 rounded-lg text-white text-xs font-bold
+                            {% if reservation.payment.status == 'paid' %} bg-green-500
+                            {% elif reservation.payment.status == 'pending' %} bg-yellow-700
+                            {% elif reservation.payment.status == 'failed' %} bg-red-500
+                            {% endif %}">
+                            {{ reservation.payment.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-3 py-2">
+                        {% if reservation.payment.status == 'pending' and reservation.date_reserved > today %}
+                            <a href="{% url 'cancel_reservation' reservation.id %}" 
+                                class="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition">
+                                Cancel
+                            </a>
+                        {% else %}
+                            <button class="bg-gray-400 text-white py-1 px-3 rounded cursor-not-allowed" disabled>
+                                Cannot Cancel
+                            </button>
+                        {% endif %}
+                    </td>
+                                                         
+                </tr>
+                {% endfor %}
+            </tbody>            
+        </table>    
+        <div class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-700">
+                Page {{ reservations.number }} of {{ reservations.paginator.num_pages }}
+            </div>
+            <div class="flex space-x-2 mt-2 md:mt-0">
+                {% if reservations.has_previous %}
+                    <a href="?page=1" class="bg-blue-500 text-white py-2 px-4 rounded">First</a>
+                    <a href="?page={{ reservations.previous_page_number }}" class="bg-blue-500 text-white py-2 px-4 rounded">Previous</a>
+                {% endif %}
+                {% if reservations.has_next %}
+                    <a href="?page={{ reservations.next_page_number }}" class="bg-blue-500 text-white py-2 px-4 rounded">Next</a>
+                    <a href="?page={{ reservations.paginator.num_pages }}" class="bg-blue-500 text-white py-2 px-4 rounded">Last</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-gray-600 text-center">No reservations found.</p>
+    {% endif %}
+</div>
+
+
+<section class="container mx-auto p-6 bg-gray-50 rounded-lg">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Explore Our Public Beaches</h2>
+
+    <div class="flex flex-wrap -mx-2 justify-center">
+        {% for beach in beaches %}
+        <div class="w-full sm:w-1/2 md:w-1/3 lg:w-1/5 px-2 mb-6">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <img src="{{ beach.image.url }}" alt="{{ beach.name }}" 
+                    class="w-full h-40 object-cover cursor-pointer"
+                    onclick="openImageModal('{{ beach.image.url }}')">
+                <div class="p-4">
+                    <h3 class="text-sm font-semibold text-gray-900">{{ beach.name }}</h3>
+                    <p class="text-gray-500 text-xs mt-2"><strong>Location:</strong> {{ beach.location }}</p>
+                    <p class="text-gray-600 text-xs mt-2">{{ beach.description }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+
+
+<!-- Beach Image Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center hidden">
+    <div class="relative bg-white p-6 rounded-lg shadow-lg text-center">
+        <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl" onclick="closeImageModal()">✖</button>
+        <img id="modalImage" src="" alt="Beach Image" class="max-w-full h-auto rounded-lg">
+    </div>
+</div>
+
+
+
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden">
+    <div class="relative">
+        <img id="modalImage" class="max-w-full max-h-screen object-contain" src="" alt="Large view">
+        <button id="closeModal" class="absolute top-4 right-4 bg-white text-black rounded-full p-2">X</button>
+    </div>
+</div>
+
+<!-- Profile Edit Modal (Initially Hidden) -->
+<div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
+        <!-- Close Button -->
+        <button onclick="closeProfileModal()" 
+            class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl">
+            ✖
+        </button>
+
+        <!-- Modal Title -->
+        <h3 class="text-lg font-semibold text-blue-700 mb-3">Edit Your Profile</h3>
+
+        <!-- Profile Edit Form -->
+        <form method="POST" action="{% url 'update_profile' %}" enctype="multipart/form-data" class="grid grid-cols-1 gap-4">
+            {% csrf_token %}
+
+            <!-- Profile Picture Upload -->
+            <div>
+                <label class="block text-gray-700 font-medium">Profile Picture</label>
+                <input type="file" name="profile_picture" 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
+            </div>
+
+            <!-- Nickname -->
+            <div>
+                <label class="block text-gray-700 font-medium">Nickname</label>
+                <input type="text" name="nickname" value="{{ tourist.nickname }}" 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
+            </div>
+
+            <!-- Contact Number -->
+            <div>
+                <label class="block text-gray-700 font-medium">Contact Number</label>
+                <input type="text" name="contact_number" value="{{ tourist.contact_number }}" 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+                    autocomplete="tel">
+            </div>
+
+
+            <!-- Address -->
+            <div>
+                <label class="block text-gray-700 font-medium">Address</label>
+                <textarea name="address" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">{{ tourist.address }}</textarea>
+            </div>
+
+            <!-- Password Change -->
+            <div>
+                <label class="block text-gray-700 font-medium">New Password</label>
+                <input type="password" name="password" 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" 
+                    placeholder="Leave blank to keep current password"
+                    autocomplete="current-password">
+            </div>
+
+
+            <!-- Save Button -->
+            <div class="text-right">
+                <button type="submit" class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<!-- JavaScript for Toggling Modal -->
+<script>
+    function openProfileModal() {
+        document.getElementById("profileModal").classList.remove("hidden");
+    }
+
+    function closeProfileModal() {
+        document.getElementById("profileModal").classList.add("hidden");
+    }
+
+    // Close modal when clicking outside the form
+    document.getElementById("profileModal").addEventListener("click", function(event) {
+        if (event.target === this) {
+            closeProfileModal();
+        }
+    });
+    function openImageModal(imageUrl) {
+            document.getElementById("modalImage").src = imageUrl;
+            document.getElementById("imageModal").classList.remove("hidden");
+        }
+        
+        function closeImageModal() {
+            document.getElementById("imageModal").classList.add("hidden");
+        }
+    
+        // Close modal when clicking outside the image
+        document.getElementById("imageModal").addEventListener("click", function(event) {
+            if (event.target === this) {
+                closeImageModal();
+            }
+        });
+
+        
+        // Modal Image Functionality
+        const image = document.getElementById("bitoonImage");
+        const modal = document.getElementById("imageModal");
+        const modalImage = document.getElementById("modalImage");
+        const closeModal = document.getElementById("closeModal");
+
+        image?.addEventListener("click", () => {
+            modal?.classList.remove("hidden");
+            modalImage.src = image.src;
+        });
+
+        closeModal?.addEventListener("click", () => {
+            modal?.classList.add("hidden");
+        });
+
+        modal?.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.classList.add("hidden");
+            }
+        });
+                
+        
+
+
+
+
+        // Function to close the Edit Reservation Modal
+        function closeEditReservationModal() {
+            document.getElementById("editReservationModal").classList.add("hidden");
+        }
+
+
+</script>
+
+{% endblock %}

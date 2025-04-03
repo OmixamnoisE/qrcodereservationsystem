@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Collectors{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'admin/admin_sidebar.html' %}
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <h2 class="text-2xl font-semibold text-blue-700 text-center mb-6">Manage Collectors</h2>
+
+        <div class="relative overflow-x-auto bg-white shadow-md rounded-lg">
+            <table class="w-full text-sm text-left text-gray-700">
+                <thead class="text-xs text-white bg-blue-600 uppercase">
+                    <tr>
+                        <th class="px-4 py-3">Profile</th>
+                        <th class="px-4 py-3">Collector Name</th>
+                        <th class="px-4 py-3">Contact</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3">Toggle Status</th>  <!-- Added Toggle Status column -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for collector in collectors %}
+                    <tr class="border-b">
+                        <!-- Profile Picture -->
+                        <td class="px-6 py-4 text-center">
+                            {% if collector.user.profile_picture %}
+                                <a href="{{ collector.user.profile_picture.url }}" target="_blank">
+                                    <img src="{{ collector.user.profile_picture.url }}" 
+                                         alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-gray-300 object-cover cursor-pointer">
+                                </a>
+                            {% else %}
+                                <img src="{% static 'images/default-profile.png' %}" 
+                                     alt="Default Profile" class="w-12 h-12 rounded-full border-2 border-gray-300 object-cover">
+                            {% endif %}
+                        </td>
+
+                        <!-- Collector Name -->
+                        <td class="px-4 py-3 font-medium">{{ collector.fullname }}</td>
+                        
+                        <!-- Contact Number -->
+                        <td class="px-4 py-3">{{ collector.contact_number }}</td>
+
+                        <!-- Status -->
+                        <td class="px-4 py-3 flex items-center">
+                            <div class="h-2.5 w-2.5 rounded-full {% if collector.status == 'online' %}bg-green-500{% else %}bg-red-500{% endif %} mr-2"></div>
+                            {{ collector.status|title }}
+                        </td>
+
+
+                        <!-- Toggle Status -->
+                        <td class="px-4 py-3">
+                            <form action="{% url 'toggle_collector_status' collector.id %}" method="POST">
+                                {% csrf_token %}
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" id="toggle_status_{{ collector.id }}" onchange="this.form.submit()"
+                                           class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-gray-300 cursor-pointer" 
+                                           {% if collector.is_active %}checked{% endif %}>
+                                    <label for="toggle_status_{{ collector.id }}" 
+                                           class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer bg-gray-300"></label>
+                                    <span class="toggle-text absolute text-xs text-white font-semibold transition-all duration-200 ease-in {% if collector.is_active %}right-0.5{% else %}left-0.5{% endif %} top-0.5">{% if collector.is_active %}Activate{% else %}Deactivate{% endif %}</span>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-gray-500">No collectors found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% block extra_styles %}
+<style>
+    /* Toggle styles */
+    .toggle-checkbox:checked {
+        right: 0;
+        background-color: #4CAF50; /* Green for active state */
+    }
+    
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: #4CAF50; /* Green for active state */
+    }
+
+    .toggle-label {
+        background-color: #ccc; /* Light gray background for inactive state */
+    }
+
+    .toggle-text {
+        left: 0;
+        color: #333;
+        text-align: center;
+        width: 100%;
+        transition: all 0.2s ease;
+        position: absolute;
+        top: -20px; /* Move the text up a little bit */
+    }
+
+    .toggle-checkbox:checked ~ .toggle-text {
+        right: 0;
+        color: green;
+    }
+</style>
+{% endblock %}
+
+{% endblock %}

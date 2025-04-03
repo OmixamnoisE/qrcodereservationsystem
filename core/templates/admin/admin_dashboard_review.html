@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Preview{% endblock %}
+
+{% block content %}
+<div class="flex h-screen">
+    {% include 'admin/admin_sidebar.html' %}
+
+    <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
+        <h1 class="text-2xl font-semibold mb-4">Report Preview</h1>
+
+        <div class="bg-white p-4 shadow rounded">
+            <h2 class="text-lg font-semibold mb-4">Report Summary</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-gray-100 p-4 rounded">
+                    <h3 class="text-gray-600 text-sm">Total Tourists</h3>
+                    <p class="text-xl font-bold text-green-600">{{ total_tourists|default:"0" }}</p>
+                </div>
+                <div class="bg-gray-100 p-4 rounded">
+                    <h3 class="text-gray-600 text-sm">Local Tourists</h3>
+                    <p class="text-xl font-bold text-blue-600">{{ local_tourists|default:"0" }}</p>
+                </div>
+                <div class="bg-gray-100 p-4 rounded">
+                    <h3 class="text-gray-600 text-sm">Foreign Tourists</h3>
+                    <p class="text-xl font-bold text-yellow-500">{{ foreign_tourists|default:"0" }}</p>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <h2 class="text-md font-semibold mb-4">Charts Overview</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                        <h3 class="text-md font-semibold mb-2">Tourists by Gender</h3>
+                        <canvas id="genderChart"></canvas>
+                    </div>
+
+                    <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                        <h3 class="text-md font-semibold mb-2">Beach Visit Breakdown</h3>
+                        <canvas id="beachChart"></canvas>
+                    </div>
+                    
+                    <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                        <h3 class="text-md font-semibold mb-2">Tourist Type</h3>
+                        <canvas id="touristTypeChart"></canvas>
+                    </div>
+
+                    <div class="bg-white p-4 shadow rounded" style="height: 300px;">
+                        <h3 class="text-md font-semibold mb-2">Visits Over Time</h3>
+                        <canvas id="visitTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="flex justify-between mt-8">
+            <a href="{% url 'admin_dashboard' %}" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-700">
+                Back to Dashboard
+            </a>
+            <a href="{% url 'download_report' %}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+                Download Report
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1"></script>
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const createChart = (id, type, data, options = {}) => new Chart(document.getElementById(id).getContext('2d'), { 
+            type, 
+            data, 
+            options: { responsive: true, maintainAspectRatio: false, ...options } 
+        });
+
+        const chartsData = {
+            gender: {
+                labels: ['Male', 'Female', 'Other'],
+                data: [{{ male_count }}, {{ female_count }}, {{ other_count }}],
+                backgroundColor: ['#4CAF50', '#2196F3', '#FFC107']
+            },
+            beaches: {
+                labels: {{ beach_labels|safe }},
+                data: {{ beach_visits|safe }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            },
+            touristType: {
+                labels: ['Local', 'Foreign'],
+                data: [{{ local_tourists }}, {{ foreign_tourists }}],
+                backgroundColor: ['#36A2EB', '#FF6384']
+            },
+            visitsOverTime: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                data: [{{ jan_visits }}, {{ feb_visits }}, {{ mar_visits }}, {{ apr_visits }}, {{ may_visits }}],
+                borderColor: '#007BFF'
+            },
+        };
+
+        createChart('genderChart', 'bar', { 
+            labels: chartsData.gender.labels,
+            datasets: [{ 
+                data: chartsData.gender.data,
+                backgroundColor: chartsData.gender.backgroundColor
+            }], 
+        });
+
+        createChart('beachChart', 'bar', { 
+            labels: chartsData.beaches.labels,
+            datasets: [{ 
+                data: chartsData.beaches.data,
+                backgroundColor: chartsData.beaches.backgroundColor
+            }],
+        }, { indexAxis: 'y' });
+
+        createChart('touristTypeChart', 'doughnut', { 
+            labels: chartsData.touristType.labels,
+            datasets: [{ 
+                data: chartsData.touristType.data,
+                backgroundColor: chartsData.touristType.backgroundColor
+            }]
+        });
+
+        createChart('visitTimeChart', 'line', { 
+            labels: chartsData.visitsOverTime.labels,
+            datasets: [{ 
+                data: chartsData.visitsOverTime.data,
+                borderColor: chartsData.visitsOverTime.borderColor,
+                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                borderWidth: 2
+            }]
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

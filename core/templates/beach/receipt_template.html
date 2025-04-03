@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .receipt-container {
+            width: 300px;
+            border: 1px solid black;
+            padding: 15px;
+            margin: auto;
+        }
+        .header {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .details {
+            text-align: left;
+            margin-top: 10px;
+        }
+        .details p {
+            margin: 5px 0;
+        }
+        .qr-code {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-container">
+        <p class="header">Beach Resort Receipt</p>
+        <div class="details">
+            <p><strong>Tourist:</strong> {{ tourist.name }}</p>
+            <p><strong>Email:</strong> {{ tourist.email }}</p>
+            <p><strong>Contact:</strong> {{ tourist.contact_number }}</p>
+            <p><strong>Date:</strong> {{ reservation.date_reserved }}</p>
+            <p><strong>People:</strong> {{ reservation.num_people }}</p>
+            <p><strong>Total Paid:</strong> ₱{{ reservation.total_price }}</p>
+            <p><strong>Payment Method:</strong> {{ reservation.payment_method|capfirst }}</p>
+            <p><strong>Status:</strong> {{ reservation.payment_status|capfirst }}</p>
+        </div>
+
+        <div class="qr-code">
+            <img src="{{ tourist.qr_code }}" alt="Tourist QR Code" width="150">
+        </div>
+
+        <p>Thank you for your reservation!</p>
+    </div>
+
+    <script>
+        window.print();  // ✅ Auto Print on Page Load
+    </script>
+
+</body>
+</html>
