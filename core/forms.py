@@ -97,3 +97,7 @@ class ReservationForm(forms.ModelForm):
 class DateFilterForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label="Start Date")
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label="End Date")
+
+
+class ReportForm(forms.Form):
+    prepared_by = forms.CharField(label='Prepared By', max_length=100)

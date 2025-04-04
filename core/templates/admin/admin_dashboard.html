@@ -81,11 +81,27 @@
         </div>
 
 
-        
+        <!-- Modal for Entering Name -->
+        <div id="nameModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+                <h2 class="text-lg font-semibold mb-4">Enter Your Name</h2>
+                <form id="nameForm" method="POST" action="{% url 'generate_report' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="prepared_by" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" id="prepared_by" name="prepared_by" class="mt-1 p-2 border rounded w-full" required>
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded w-full">Generate Report</button>
+                </form>
+                <button id="closeModal" class="mt-4 w-full text-gray-500">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Generate Report Button -->
         <div class="flex justify-center mt-20 mb-10">
-            <a href="{% url 'generate_report' %}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+            <button id="openModal" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
                 Download Report
-            </a>
+            </button>
         </div>
         
 
@@ -172,7 +188,21 @@
             }],
         });
     });
+    document.addEventListener("DOMContentLoaded", function () {
+        const openModalButton = document.getElementById('openModal');
+        const modal = document.getElementById('nameModal');
+        const closeModalButton = document.getElementById('closeModal');
 
+        // Show the modal when "Download Report" is clicked
+        openModalButton.addEventListener('click', function () {
+            modal.classList.remove('hidden');
+        });
+
+        // Close the modal when "Cancel" is clicked
+        closeModalButton.addEventListener('click', function () {
+            modal.classList.add('hidden');
+        });
+    });
 
 
 </script>

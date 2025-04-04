@@ -56,7 +56,7 @@ import csv
 from reportlab.lib.utils import simpleSplit
 
 from core.models import Payment, Reservation, CustomUser, Collector, Beach, Tourist
-from core.forms import BeachForm, TouristRegistrationForm
+from core.forms import BeachForm, TouristRegistrationForm, ReportForm
 
 import logging
 
@@ -692,168 +692,207 @@ def admin_dashboard(request):
 
     return render(request, 'admin/admin_dashboard.html', context)
 
-
 @login_required
 @user_passes_test(is_admin)
 def generate_report(request):
-    # Retrieve filter dates from GET parameters
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            # Get the 'Prepared By' name from the form
+            prepared_by = form.cleaned_data['prepared_by']
+            
+            # Retrieve filter dates from GET parameters
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
 
-    # Convert to datetime if available
-    if start_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d')
-    if end_date:
-        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            # Convert to datetime if available
+            if start_date:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            if end_date:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d')
 
-    # Gather data with applied filters (if any)
-    gender_counts = Tourist.objects.values('gender').annotate(count=Count('gender'))
-    counts = {item['gender']: item['count'] for item in gender_counts}
-    male_count = counts.get('male', 0)
-    female_count = counts.get('female', 0)
-    other_count = counts.get('other', 0)
+            # Gather data with applied filters (if any)
+            gender_counts = Tourist.objects.values('gender').annotate(count=Count('gender'))
+            counts = {item['gender']: item['count'] for item in gender_counts}
+            male_count = counts.get('male', 0)
+            female_count = counts.get('female', 0)
+            other_count = counts.get('other', 0)
 
-    collector_approval_counts = Collector.objects.annotate(
-        approved_count=Count('reservation', filter=Q(reservation__approved=True))
-    ).order_by('-approved_count')
+            collector_approval_counts = Collector.objects.annotate(
+                approved_count=Count('reservation', filter=Q(reservation__approved=True))
+            ).order_by('-approved_count')
 
-    collector_names = [collector.nickname for collector in collector_approval_counts]
-    collector_approvals = [collector.approved_count for collector in collector_approval_counts]
+            collector_names = [collector.nickname for collector in collector_approval_counts]
+            collector_approvals = [collector.approved_count for collector in collector_approval_counts]
 
-    # Filter beach visits by date range if provided
-    beach_counts = (
-        Reservation.objects
-        .filter(date_reserved__gte=start_date if start_date else timezone.now())
-        .filter(date_reserved__lte=end_date if end_date else timezone.now())
-        .values('beach__name')
-        .annotate(count=Count('beach'))
-        .order_by('-count')
-    )
-    beach_labels = [item['beach__name'] for item in beach_counts]
-    beach_visits = [item['count'] for item in beach_counts]
+            # Filter beach visits by date range if provided
+            beach_counts = (
+                Reservation.objects
+                .filter(date_reserved__gte=start_date if start_date else timezone.now())
+                .filter(date_reserved__lte=end_date if end_date else timezone.now())
+                .values('beach__name')
+                .annotate(count=Count('beach'))
+                .order_by('-count')
+            )
+            beach_labels = [item['beach__name'] for item in beach_counts]
+            beach_visits = [item['count'] for item in beach_counts]
 
-    # Tourist types (local/foreign) filtering by date
-    local_tourists = Tourist.objects.filter(tourist_type='local')
-    if start_date:
-        local_tourists = local_tourists.filter(reservation__date_reserved__gte=start_date)
-    if end_date:
-        local_tourists = local_tourists.filter(reservation__date_reserved__lte=end_date)
+            # Tourist types (local/foreign) filtering by date
+            local_tourists = Tourist.objects.filter(tourist_type='local')
+            if start_date:
+                local_tourists = local_tourists.filter(reservation__date_reserved__gte=start_date)
+            if end_date:
+                local_tourists = local_tourists.filter(reservation__date_reserved__lte=end_date)
 
-    foreign_tourists = Tourist.objects.filter(tourist_type='foreign')
-    if start_date:
-        foreign_tourists = foreign_tourists.filter(reservation__date_reserved__gte=start_date)
-    if end_date:
-        foreign_tourists = foreign_tourists.filter(reservation__date_reserved__lte=end_date)
+            foreign_tourists = Tourist.objects.filter(tourist_type='foreign')
+            if start_date:
+                foreign_tourists = foreign_tourists.filter(reservation__date_reserved__gte=start_date)
+            if end_date:
+                foreign_tourists = foreign_tourists.filter(reservation__date_reserved__lte=end_date)
 
-    local_tourists_count = local_tourists.count()
-    foreign_tourists_count = foreign_tourists.count()
+            local_tourists_count = local_tourists.count()
+            foreign_tourists_count = foreign_tourists.count()
 
-    # Monthly Visits Section with filters
-    visits_per_month = (
-        Reservation.objects
-        .filter(date_reserved__gte=start_date if start_date else timezone.now())
-        .filter(date_reserved__lte=end_date if end_date else timezone.now())
-        .annotate(month=ExtractMonth('date_reserved'))
-        .values('month')
-        .annotate(count=Count('id'))
-    )
+            # Initialize a dictionary to store visit counts for months (1 to 12)
+            month_counts = {month: {'count': 0, 'visitors': 0, 'num_people': 0} for month in range(1, 13)}
 
-    # Initialize a dictionary to store visit counts for months (1 to 12)
-    month_counts = {month: 0 for month in range(1, 13)}
-    for item in visits_per_month:
-        month = item['month']
-        month_counts[month] = item['count']
+            reservations = (
+                Reservation.objects
+                .filter(approved=True)
+                .filter(date_reserved__gte=start_date if start_date else timezone.now())
+                .filter(date_reserved__lte=end_date if end_date else timezone.now())
+                .values('date_reserved')
+                .annotate(month=ExtractMonth('date_reserved'))
+                .annotate(reservation_count=Count('id'), people_count=Sum('num_people'))  # Get reservation count and sum of num_people
+            )
 
-    # Create a PDF response
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="admin_dashboard_report_{timezone.now().strftime("%Y-%m-%d_%H-%M-%S")}.pdf"'
+            for item in reservations:
+                month = item['month']
+                month_counts[month]['count'] = item['reservation_count']  # Total number of reservations in the month
+                month_counts[month]['num_people'] = item['people_count']  # Total number of people for all reservations in the month
 
-    # Create PDF canvas
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=A4)
-    pdf.setTitle("Admin Dashboard Report")
+            # Calculate unique visitors (tourists) for each month
+            for month in range(1, 13):
+                unique_visitors = Reservation.objects.filter(
+                    approved=True, 
+                    date_reserved__month=month
+                ).values('tourist').distinct().count()
+                month_counts[month]['visitors'] = unique_visitors 
 
-    # Add system logo (if available)
-    try:
-        logo_path = "path/to/your/logo.png"  # Update the path to your logo file
-        pdf.drawImage(logo_path, 190, 770, width=200, height=80)  # Centered logo
-    except Exception:
-        pass
+            # Create a PDF response
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="admin_dashboard_report_{timezone.now().strftime("%Y-%m-%d_%H-%M-%S")}.pdf"'
 
-    # Report Title - Centered
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawCentredString(300, 740, "Admin Dashboard Report")
-    pdf.setFont("Helvetica", 10)
-    pdf.drawCentredString(300, 720, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            # Create PDF canvas
+            buffer = BytesIO()
+            pdf = canvas.Canvas(buffer, pagesize=A4)
+            pdf.setTitle("Admin Dashboard Report")
 
-    y_position = 680
+            # Report Title - Centered
+            pdf.setFont("Helvetica-Bold", 14)
+            pdf.drawCentredString(300, 800, "Admin Dashboard Report")
+            pdf.setFont("Helvetica", 10)
+            pdf.drawCentredString(300, 780, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    # Tourist Demographics Section - Centered
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawCentredString(300, y_position, "Tourist Demographics")
-    y_position -= 20
-    pdf.setFont("Helvetica", 10)
-    pdf.drawCentredString(300, y_position, f"Total Tourists: {local_tourists_count + foreign_tourists_count}")
-    pdf.drawCentredString(300, y_position - 20, f"Local Tourists: {local_tourists_count}")
-    pdf.drawCentredString(300, y_position - 40, f"Foreign Tourists: {foreign_tourists_count}")
-    y_position -= 60
+            y_position = 740
 
-    # Gender Distribution Chart
-    plt.figure(figsize=(4, 3))
-    plt.bar(['Male', 'Female', 'Other'], [male_count, female_count, other_count], color=['blue', 'red', 'green'])
-    plt.title("Gender Distribution")
-    plt.xlabel("Gender")
-    plt.ylabel("Count")
-    chart_buffer = BytesIO()
-    plt.savefig(chart_buffer, format='png')
-    plt.close()
-    chart_buffer.seek(0)
-    pdf.drawImage(ImageReader(chart_buffer), 180, y_position - 150, width=250, height=150)
-    y_position -= 180
+            # Function to handle page breaks
+            def check_page_break(y_position):
+                if y_position < 50:  # Adjust this as needed
+                    pdf.showPage()  # Create a new page
+                    pdf.setFont("Helvetica-Bold", 14)
+                    pdf.drawCentredString(300, 800, "Admin Dashboard Report")
+                    pdf.setFont("Helvetica", 10)
+                    pdf.drawCentredString(300, 780, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                    return 740  # Reset the y_position for the new page
+                return y_position
 
-    # Beach Statistics Section - Centered
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawCentredString(300, y_position, "Beach Statistics")
-    y_position -= 20
-    pdf.setFont("Helvetica", 10)
-    pdf.drawCentredString(300, y_position, f"Most Visited Beach: {beach_labels[0] if beach_labels else 'None'}")
-    pdf.drawCentredString(300, y_position - 20, f"Visit Count: {beach_visits[0] if beach_visits else 0}")
-    y_position -= 60
+            # Tourist Demographics Section - Centered
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.drawCentredString(300, y_position, "Tourist Demographics")
+            y_position -= 20
+            pdf.setFont("Helvetica", 10)
+            pdf.drawCentredString(300, y_position, f"Total Tourists: {local_tourists_count + foreign_tourists_count}")
+            pdf.drawCentredString(300, y_position - 20, f"Local Tourists: {local_tourists_count}")
+            pdf.drawCentredString(300, y_position - 40, f"Foreign Tourists: {foreign_tourists_count}")
+            y_position -= 60
 
-    # Monthly Visits Section - Centered
-    plt.figure(figsize=(4, 3))
-    plt.plot(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-             [month_counts[i] for i in range(1, 13)], marker='o', color='purple')
-    plt.title("Monthly Visits")
-    plt.xlabel("Month")
-    plt.ylabel("Visits")
-    chart_buffer = BytesIO()
-    plt.savefig(chart_buffer, format='png')
-    plt.close()
-    chart_buffer.seek(0)
-    pdf.drawImage(ImageReader(chart_buffer), 180, y_position - 150, width=250, height=150)
-    y_position -= 180
+            # Gender Distribution Table
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.drawCentredString(300, y_position, "Gender Distribution")
+            y_position -= 20
+            pdf.setFont("Helvetica", 10)
+            pdf.drawCentredString(300, y_position, f"Male: {male_count}")
+            pdf.drawCentredString(300, y_position - 20, f"Female: {female_count}")
+            pdf.drawCentredString(300, y_position - 40, f"Other: {other_count}")
+            y_position -= 60
 
-    # Collector Approvals Section - Centered
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawCentredString(300, y_position, "Collector Approvals")
-    y_position -= 20
-    plt.figure(figsize=(4, 3))
-    plt.bar(collector_names, collector_approvals, color='cyan')
-    plt.title("Collector Approval Counts")
-    plt.xlabel("Collector")
-    plt.xticks(rotation=45)
-    plt.ylabel("Approvals")
-    chart_buffer = BytesIO()
-    plt.savefig(chart_buffer, format='png')
-    plt.close()
-    chart_buffer.seek(0)
-    pdf.drawImage(ImageReader(chart_buffer), 180, y_position - 150, width=250, height=150)
+            # Beach Statistics Section - Centered
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.drawCentredString(300, y_position, "Beach Statistics")
+            y_position -= 20
+            pdf.setFont("Helvetica", 10)
+            pdf.drawCentredString(300, y_position, f"Most Visited Beach: {beach_labels[0] if beach_labels else 'None'}")
+            pdf.drawCentredString(300, y_position - 20, f"Visit Count: {beach_visits[0] if beach_visits else 0}")
+            y_position -= 60
 
-    pdf.save()
-    buffer.seek(0)
-    response.write(buffer.read())
-    return response
+            # Monthly Visits Table - Centered
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.drawCentredString(300, y_position, "Monthly Visits")
+            y_position -= 20
+
+            # Table Header
+            pdf.setFont("Helvetica-Bold", 10)
+            pdf.drawString(100, y_position, "Month")
+            pdf.drawString(200, y_position, "Approved Visitors")
+            pdf.drawString(300, y_position, "Total Visits")
+            pdf.drawString(400, y_position, "Total People")
+            y_position -= 20
+                        
+            # Define months array
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+            # Prepare the data for the monthly visits table
+            for i, month in enumerate(months, 1):  # Month index is 1-12
+                visit_count = month_counts.get(i, 0)['count']  # Get the visit count for each month
+                approved_count = month_counts.get(i, 0)['visitors']  # Unique visitors count for the month
+                total_people = month_counts.get(i, 0)['num_people']  # Total people for the month
+                
+                # Add rows for the table
+                pdf.setFont("Helvetica", 10)
+                pdf.drawString(100, y_position, f"{month}")
+                pdf.drawRightString(200, y_position, f"{approved_count}")
+                pdf.drawRightString(300, y_position, f"{visit_count}")
+                pdf.drawRightString(400, y_position, f"{total_people}")
+                
+                y_position -= 20
+
+                # Check page break
+                y_position = check_page_break(y_position)
+
+            # Collector Approvals Section - Centered
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.drawCentredString(300, y_position, "Collector Approvals")
+            y_position -= 20
+            for name, count in zip(collector_names, collector_approvals):
+                pdf.setFont("Helvetica", 10)
+                pdf.drawCentredString(300, y_position, f"{name}: {count}")
+                y_position -= 20
+
+            y_position -= 60  # Adjust to position at the bottom of the page
+            pdf.setFont("Helvetica", 10)
+            pdf.drawCentredString(300, y_position, f"Prepared By: {prepared_by}")
+
+            pdf.save()
+            buffer.seek(0)
+            response.write(buffer.read())
+            return response
+        else:
+            form = ReportForm()
+
+    return render(request, 'admin_dashboard.html', {'form': form})
+
+
 
 
 @login_required
