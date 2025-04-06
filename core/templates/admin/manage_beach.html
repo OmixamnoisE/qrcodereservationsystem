@@ -5,91 +5,105 @@
 {% load static %}
 
 {% block content %}
-<div class="flex h-screen">
+<div class="flex h-screen bg-gray-50">
     {% include 'admin/admin_sidebar.html' %}
 
     <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
-        <h2 class="text-2xl font-semibold text-blue-700 text-center mb-6">Manage Beaches</h2>
+        <div class="max-w-7xl mx-auto">
+            <!-- Header Section -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Manage Beaches</h2>
+            </div>
 
-        <div class="relative overflow-x-auto bg-white shadow-md rounded-lg">
-            <table class="w-full text-sm text-left text-gray-700">
-                <thead class="text-xs text-white bg-blue-600 uppercase">
-                    <tr>
-                        <th class="px-4 py-3">Image</th>
-                        <th class="px-4 py-3">Beach Name</th>
-                        <th class="px-4 py-3">Location</th>
-                        <th class="px-4 py-3">Description</th>
-                        <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for beach in beaches %}
-                    <tr class="border-b">
-                        <!-- Beach Image -->
-                        <td class="px-6 py-4 text-center">
-                            {% if beach.image %}
-                                <a href="{{ beach.image.url }}" target="_blank">
-                                    <img src="{{ beach.image.url }}" alt="Beach Image"
-                                         class="w-16 h-12 rounded border-2 border-gray-300 object-cover">
-                                </a>
-                            {% else %}
-                                <img src="{% static 'images/default-beach.png' %}" alt="Default Beach Image"
-                                     class="w-16 h-12 rounded border-2 border-gray-300 object-cover">
-                            {% endif %}
-                        </td>
+            <!-- Beaches Table -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 text-sm uppercase font-semibold tracking-wider">
+                                <th class="px-6 py-4 text-left">Image</th>
+                                <th class="px-6 py-4 text-left">Beach Name</th>
+                                <th class="px-6 py-4 text-left">Location</th>
+                                <th class="px-6 py-4 text-left">Description</th>
+                                <th class="px-6 py-4 text-center">Status</th>
+                                <th class="px-6 py-4 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for beach in beaches %}
+                            <tr class="hover:bg-gray-50 transition duration-150">
+                                <!-- Beach Image -->
+                                <td class="px-6 py-4 text-center">
+                                    {% if beach.image %}
+                                        <a href="{{ beach.image.url }}" target="_blank">
+                                            <img src="{{ beach.image.url }}" alt="Beach Image"
+                                                 class="w-20 h-16 rounded border-2 border-gray-300 object-cover mx-auto">
+                                        </a>
+                                    {% else %}
+                                        <img src="{% static 'images/default-beach.png' %}" alt="Default Beach Image"
+                                             class="w-20 h-16 rounded border-2 border-gray-300 object-cover mx-auto">
+                                    {% endif %}
+                                </td>
 
-                        <!-- Beach Name -->
-                        <td class="px-4 py-3 font-medium">{{ beach.name }}</td>
-                        
-                        <!-- Location -->
-                        <td class="px-4 py-3">{{ beach.location }}</td>
-                        
-                        <!-- Description -->
-                        <td class="px-4 py-3">{{ beach.description|default:"No description" }}</td>
-                        
-
-                        
-                        <td class="px-4 py-3">
-                            <form action="{% url 'toggle_beach_status' beach.id %}" method="POST">
-                                {% csrf_token %}
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                                    <input type="checkbox" id="toggle_status_{{ beach.id }}" 
-                                           onchange="this.form.submit()" 
-                                           class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-gray-300 cursor-pointer" 
-                                           {% if beach.is_active %}checked{% endif %}>
-                                    <label for="toggle_status_{{ beach.id }}" 
-                                           class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer bg-gray-300"></label>
-                                    <span class="toggle-text absolute text-xs text-white font-semibold transition-all duration-200 ease-in {% if beach.is_active %}right-0.5{% else %}left-0.5{% endif %} top-0.5">
-                                        {% if beach.is_active %}Activate{% else %}Deactivate{% endif %}
-                                    </span>
-                                </div>
-                            </form>
-                        </td>
-                        
-
-                        <td class="px-4 py-3">
-                            <!-- Edit Button -->
-                            <button type="button" 
-                                    class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
-                                    onclick="openEditModal({{ beach.id }})">
-                                Edit
-                            </button>
-                        </td>
-                        
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-4 text-gray-500">No beaches found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                <!-- Beach Name -->
+                                <td class="px-6 py-4 font-medium text-gray-900">{{ beach.name }}</td>
+                                
+                                <!-- Location -->
+                                <td class="px-6 py-4 text-gray-700">{{ beach.location }}</td>
+                                
+                                <!-- Description -->
+                                <td class="px-6 py-4 text-gray-700">
+                                    {{ beach.description|default:"No description" }}
+                                </td>
+                                
+                                <!-- Status Toggle -->
+                                <td class="px-6 py-4">
+                                    <form action="{% url 'toggle_beach_status' beach.id %}" method="POST" class="flex justify-center">
+                                        {% csrf_token %}
+                                        <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" id="toggle_status_{{ beach.id }}" 
+                                                   onchange="this.form.submit()" 
+                                                   class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-gray-300 cursor-pointer" 
+                                                   {% if beach.is_active %}checked{% endif %}>
+                                            <label for="toggle_status_{{ beach.id }}" 
+                                                   class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer bg-gray-300"></label>
+                                            <span class="toggle-text absolute text-xs text-white font-semibold transition-all duration-200 ease-in {% if beach.is_active %}right-0.5{% else %}left-0.5{% endif %} top-0.5">
+                                                {% if beach.is_active %}Active{% else %}Inactive{% endif %}
+                                            </span>
+                                        </div>
+                                    </form>
+                                </td>
+                                
+                                <!-- Actions -->
+                                <td class="px-6 py-4 text-center">
+                                    <button type="button" 
+                                            class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
+                                            onclick="openEditModal({{ beach.id }})">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-8 text-gray-500">
+                                    <div class="flex flex-col items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                        </svg>
+                                        <p class="text-gray-500">No beaches found.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Container -->
+<!-- Edit Beach Modal -->
 <div id="editModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
     <div class="bg-white p-6 rounded-lg w-1/2 relative">
         <h2 class="text-lg font-semibold mb-4">Edit Beach Information</h2>
@@ -121,6 +135,7 @@
         </form>
     </div>
 </div>
+
 <script>
     function openEditModal(beachId) {
         const modal = document.getElementById('editModal');
@@ -169,6 +184,26 @@
     .toggle-checkbox:checked ~ .toggle-text {
         right: 0;
         color: green;
+    }
+    
+    /* Additional styling improvements */
+    .rounded {
+        border-radius: 0.375rem;
+    }
+    
+    th {
+        font-weight: 600;
+    }
+    
+    tr:hover img {
+        transform: scale(1.05);
+        transition: transform 0.2s ease;
+    }
+    
+    /* Improve form fields appearance */
+    input:focus, textarea:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
     }
 </style>
 {% endblock %}

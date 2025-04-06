@@ -7,75 +7,149 @@
 {% load humanize %}
 
 {% block content %}
-<div class="flex h-screen">
+<div class="flex h-screen bg-gray-50">
     {% include 'beach/beach_sidebar.html' %}
     
     <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
-        <h1 class="text-2xl font-semibold mb-4">{{ collector.nickname|default:"Collector" }} Dashboard</h1>
-
-        <a href="{% url 'generate_pdf_report' %}" style="background: blue; color: white; padding: 10px; display: block; text-align: center; margin-top: 20px;">
-            Download PDF Report
-        </a>
-        
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">{{ collector.nickname|default:"Collector" }} Dashboard</h1>
+                <p class="text-gray-600 mt-1">Managing {{ collector.beach.name }}</p>
+            </div>
+            
+            <a href="{% url 'generate_pdf_report' %}" 
+               class="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg shadow transition duration-200 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download PDF Report
+            </a>
+        </div>
 
         <!-- Summary Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Total Reservations</h3>
-                <p class="text-xl font-bold text-green-600">{{ total_reservations|default:"0" }}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 hover:shadow-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Reservations</h3>
+                        <p class="text-2xl font-bold text-gray-800 mt-1">{{ total_reservations|default:"0" }}</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Approved Reservations</h3>
-                <p class="text-xl font-bold text-blue-600">{{ approved_reservations|default:"0" }}</p>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 hover:shadow-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Approved Reservations</h3>
+                        <p class="text-2xl font-bold text-gray-800 mt-1">{{ approved_reservations|default:"0" }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Pending Payments</h3>
-                <p class="text-xl font-bold text-yellow-500">{{ pending_payments|default:"0" }}</p>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 hover:shadow-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Pending Payments</h3>
+                        <p class="text-2xl font-bold text-gray-800 mt-1">{{ pending_payments|default:"0" }}</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Earnings Today</h3>
-                <p class="text-xl font-bold text-green-600">₱{{ total_earnings_today|floatformat:2|intcomma|default:"0.00" }}</p>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 hover:shadow-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Earnings Today</h3>
+                        <p class="text-2xl font-bold text-gray-800 mt-1">₱{{ total_earnings_today|floatformat:2|intcomma|default:"0.00" }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Reservations and Payments Section -->
-        <div class="grid grid-cols-1 sm:grid-cols-1 gap-6">
+        <!-- Main Content Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Reservations Section -->
-            <div class="bg-white p-6 rounded shadow mt-6">
-                <h2 class="text-xl text-blue-700 font-bold mb-4">Reservations for {{ collector.beach.name }}</h2>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="border-b border-gray-100 p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-gray-800">Reservations</h2>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ collector.beach.name }}</span>
+                    </div>
+                </div>
         
                 {% if reservations %}
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white table-auto text-sm">
-                        <thead>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th class="p-4 text-left">Tourist</th>
-                                <th class="p-4 text-left">Date</th>
-                                <th class="p-4 text-left">People</th>
-                                <th class="p-4 text-left">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tourist</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">People</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="bg-white divide-y divide-gray-200">
                             {% for reservation in reservations %}
-                            <tr>
-                                <td class="p-4">
-                                    {% if reservation.tourist.nickname %}
-                                        {{ reservation.tourist.nickname }}
-                                    {% else %}
-                                        {% if reservation.approved %}
-                                            {{ reservation.approved_by.nickname|default:"No Nickname" }}
-                                        {% else %}
-                                            No Nickname
-                                        {% endif %}
-                                    {% endif %}
+                            <tr class="hover:bg-gray-50 transition duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span class="text-blue-700 font-medium">
+                                                {% if reservation.tourist.nickname %}
+                                                    {{ reservation.tourist.nickname|slice:":1" }}
+                                                {% else %}
+                                                    ?
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="ml-4">
+                                            {% if reservation.tourist.nickname %}
+                                                {{ reservation.tourist.nickname }}
+                                            {% else %}
+                                                {% if reservation.approved %}
+                                                    {{ reservation.approved_by.nickname|default:"No Nickname" }}
+                                                {% else %}
+                                                    No Nickname
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="p-4">{{ reservation.date_reserved }}</td>
-                                <td class="p-4">{{ reservation.num_people }}</td>
-                                <td class="p-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ reservation.date_reserved }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ reservation.num_people }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     {% if reservation.approved %}
-                                    <span class="text-green-500">Approved</span>
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Approved
+                                    </span>
                                     {% else %}
-                                    <span class="text-yellow-500">Pending</span>
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Pending
+                                    </span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -84,46 +158,65 @@
                     </table>
                 </div>
                 {% else %}
-                <p>No reservations yet.</p>
+                <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p class="text-gray-500">No reservations available yet.</p>
+                </div>
                 {% endif %}
             </div>
 
             <!-- Payments Section -->
-            <div class="bg-white p-6 rounded shadow mt-6">
-                <h2 class="text-xl text-blue-700 font-bold mb-4">Payment Status for {{ collector.beach.name }}</h2>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="border-b border-gray-100 p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-gray-800">Payment Status</h2>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ collector.beach.name }}</span>
+                    </div>
+                </div>
         
                 {% if payments %}
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white table-auto text-sm">
-                        <thead>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th class="p-4 text-left">Reservation</th>
-                                <th class="p-4 text-left">Amount</th>
-                                <th class="p-4 text-left">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reservation</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="bg-white divide-y divide-gray-200">
                             {% for payment in payments %}
                                 {% if payment.status == 'paid' %}
-                                <tr>
-                                    <td class="p-4">{{ payment.reservation.date_reserved }}</td>
-                                    <td class="p-4">{{ payment.amount|intcomma }}</td>
-                                    <td class="p-4"><span class="text-green-500">Paid</span></td>
+                                <tr class="hover:bg-gray-50 transition duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ payment.reservation.date_reserved }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">₱{{ payment.amount|intcomma }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Paid
+                                        </span>
+                                    </td>
                                 </tr>
                                 {% endif %}
                             {% endfor %}
-
                         </tbody>
                     </table>
                 </div>
                 {% else %}
-                <p>No payments recorded.</p>
+                <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-gray-500">No payments recorded yet.</p>
+                </div>
                 {% endif %}
             </div>
-            
         </div>
     </div>
-    
-    
 </div>
 {% endblock %}

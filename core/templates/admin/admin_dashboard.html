@@ -2,122 +2,245 @@
 
 {% block title %}Admin Dashboard{% endblock %}
 
-
 {% load humanize %}
-
 {% load static %}
 
 {% block content %}
-<div class="flex h-screen">
+<div class="flex min-h-screen bg-gray-50">
     {% include 'admin/admin_sidebar.html' %}
     
     <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
-        <h1 class="text-2xl font-semibold mb-4">Admin Dashboard</h1>
-
-        <form method="GET" class="mb-6">
-            <div class="flex space-x-4">
-                <div class="flex-1">
-                    <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ form.start_date.value|default_if_none:'' }}" class="mt-1 p-2 border rounded w-full">
-                </div>
-                <div class="flex-1">
-                    <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
-                    <input type="date" name="end_date" id="end_date" value="{{ form.end_date.value|default_if_none:'' }}" class="mt-1 p-2 border rounded w-full">
-                </div>
-                <div class="flex-1">
-                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded w-full mt-6">Apply Filter</button>
-                </div>
-            </div>
-        </form>
-        
-
-        <!-- Summary Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Total Tourists</h3>
-                <p class="text-xl font-bold text-green-600">{{ total_tourists|intcomma|default:"0" }}</p>
-            </div>
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Local Tourists</h3>
-                <p class="text-xl font-bold text-blue-600">{{ local_tourists|intcomma|default:"0" }}</p>
-            </div>
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Foreign Tourists</h3>
-                <p class="text-xl font-bold text-yellow-500">{{ foreign_tourists|intcomma|default:"0" }}</p>
-            </div>
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Total Collectors</h3>
-                <p class="text-xl font-bold text-purple-600">{{ total_collectors|intcomma|default:"0" }}</p>
-            </div>
-            <div class="bg-white p-4 shadow rounded text-center">
-                <h3 class="text-gray-600 text-sm">Total Beaches</h3>
-                <p class="text-xl font-bold text-indigo-600">{{ total_beaches|intcomma|default:"0" }}</p>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            
-            
-            <div class="bg-white p-2 shadow rounded" style="height: 300px;">
-                <h2 class="text-md font-semibold mb-1">Beach Visit Breakdown</h2>
-                <canvas id="beachChart"></canvas>
-            </div>
-            
-            <div class="bg-white p-2 shadow rounded" style="height: 300px;">
-                <h2 class="text-md font-semibold mb-1">Tourist Type</h2>
-                <canvas id="touristTypeChart"></canvas>
-            </div>
-            
-            <div class="bg-white p-2 shadow rounded" style="height: 300px;">
-                <h2 class="text-md font-semibold mb-1">Visits Over Time</h2>
-                <canvas id="visitTimeChart"></canvas>
+        <div class="max-w-7xl mx-auto">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Admin Dashboard</h1>
+                
+                <!-- Download Report Button -->
+                <button id="openModal" class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow transition duration-200 ease-in-out transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download Report
+                </button>
             </div>
 
-            <div class="bg-white p-2 shadow rounded" style="height: 300px;">
-                <h2 class="text-md font-semibold mb-1">Tourists by Gender</h2>
-                <canvas id="genderChart"></canvas>
-            </div>
-        </div>
-
-
-        <!-- Modal for Entering Name -->
-        <div id="nameModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center hidden">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-                <h2 class="text-lg font-semibold mb-4">Enter Your Name</h2>
-                <form id="nameForm" method="POST" action="{% url 'generate_report' %}">
-                    {% csrf_token %}
-                    <div class="mb-4">
-                        <label for="prepared_by" class="block text-sm font-medium text-gray-700">Name</label>
-                        <input type="text" id="prepared_by" name="prepared_by" class="mt-1 p-2 border rounded w-full" required>
+            <!-- Date Filter -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Filter Data</h2>
+                <form method="GET" class="flex flex-col sm:flex-row items-end gap-4">
+                    <div class="flex-1">
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ form.start_date.value|default_if_none:'' }}" 
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded w-full">Generate Report</button>
+                    <div class="flex-1">
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ form.end_date.value|default_if_none:'' }}" 
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="sm:w-40">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md shadow transition duration-200">
+                            Apply Filter
+                        </button>
+                    </div>
                 </form>
-                <button id="closeModal" class="mt-4 w-full text-gray-500">Cancel</button>
+            </div>
+
+            <!-- Summary Metrics -->
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Key Metrics</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500 hover:shadow-lg transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Total Tourists</p>
+                                <p class="text-2xl font-bold text-gray-800">{{ total_tourists|intcomma|default:"0" }}</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500 hover:shadow-lg transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Local Tourists</p>
+                                <p class="text-2xl font-bold text-gray-800">{{ local_tourists|intcomma|default:"0" }}</p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-yellow-500 hover:shadow-lg transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Foreign Tourists</p>
+                                <p class="text-2xl font-bold text-gray-800">{{ foreign_tourists|intcomma|default:"0" }}</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-purple-500 hover:shadow-lg transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Total Collectors</p>
+                                <p class="text-2xl font-bold text-gray-800">{{ total_collectors|intcomma|default:"0" }}</p>
+                            </div>
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-indigo-500 hover:shadow-lg transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Total Beaches</p>
+                                <p class="text-2xl font-bold text-gray-800">{{ total_beaches|intcomma|default:"0" }}</p>
+                            </div>
+                            <div class="bg-indigo-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Analytics Overview</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-300" style="height: 350px;">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">Beach Visit Breakdown</h3>
+                        <div class="h-64">
+                            <canvas id="beachChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-300" style="height: 350px;">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">Tourist Type Distribution</h3>
+                        <div class="h-64">
+                            <canvas id="touristTypeChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-300" style="height: 350px;">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">Monthly Visit Trends</h3>
+                        <div class="h-64">
+                            <canvas id="visitTimeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-300" style="height: 350px;">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">Tourist Gender Distribution</h3>
+                        <div class="h-64">
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-300" style="height: 350px;">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">Collector Performance</h3>
+                        <div class="h-64">
+                            <canvas id="collectorChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Added new chart for age demographics -->
+                    <div class="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-300" style="height: 350px;">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">Tourist Age Demographics</h3>
+                        <div class="h-64">
+                            <canvas id="ageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Generate Report Button -->
-        <div class="flex justify-center mt-20 mb-10">
-            <button id="openModal" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
-                Download Report
-            </button>
-        </div>
-        
-
     </div>
 </div>
 
+<!-- Modal for Entering Name - Improved Design -->
+<div id="nameModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-2xl w-96 max-w-md transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Generate Report</h2>
+            <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <form id="nameForm" method="POST" action="{% url 'generate_report' %}">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label for="prepared_by" class="block text-sm font-medium text-gray-700 mb-2">Prepared By</label>
+                <input type="text" id="prepared_by" name="prepared_by" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" 
+                    placeholder="Enter your full name" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg shadow transition duration-200 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Generate & Download
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript Dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1"></script>
+
 {% block extra_scripts %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const createChart = (id, type, data, options = {}) => new Chart(document.getElementById(id).getContext('2d'), { 
-            type, 
-            data, 
-            options: { responsive: true, maintainAspectRatio: false, ...options } 
-        });
+        // Chart Creation Function
+        const createChart = (id, type, data, options = {}) => {
+            const ctx = document.getElementById(id).getContext('2d');
+            return new Chart(ctx, { 
+                type, 
+                data, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            padding: 10,
+                            cornerRadius: 6,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    },
+                    ...options 
+                } 
+            });
+        };
 
+        // Chart Data Configuration
         const chartsData = {
             gender: {
                 labels: ['Male', 'Female', 'Other'],
@@ -127,7 +250,7 @@
             beaches: {
                 labels: {{ beach_labels|safe }},
                 data: {{ beach_visits|safe }},
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
             },
             touristType: {
                 labels: ['Local', 'Foreign'],
@@ -137,58 +260,152 @@
             visitsOverTime: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
                 data: [{{ jan_visits }}, {{ feb_visits }}, {{ mar_visits }}, {{ apr_visits }}, {{ may_visits }}],
-                borderColor: '#007BFF'
+                borderColor: '#3b82f6'
             },
-            collectorsapproved: {  // Fixed the missing comma here
+            collectorsapproved: {
                 labels: {{ collector_names|safe }},
                 data: {{ collector_approvals|safe }},
-                backgroundColor: '#FF5733'
+                backgroundColor: ['#FF5733', '#C70039', '#900C3F', '#581845', '#FFC300']
+            },
+            // New mock data for age demographics
+            ageDemographics: {
+                labels: ['Under 18', '18-24', '25-34', '35-44', '45-54', '55+'],
+                data: [5, 20, 35, 25, 10, 5],
+                backgroundColor: ['#FFBB28', '#FF8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042']
             }
         };
 
+        // Create Charts
         createChart('genderChart', 'bar', { 
             labels: chartsData.gender.labels,
             datasets: [{ 
+                label: 'Number of Tourists',
                 data: chartsData.gender.data,
-                backgroundColor: chartsData.gender.backgroundColor
+                backgroundColor: chartsData.gender.backgroundColor,
+                borderWidth: 1,
+                borderColor: '#fff'
             }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
         });
 
         createChart('beachChart', 'bar', { 
             labels: chartsData.beaches.labels,
             datasets: [{ 
+                label: 'Number of Visits',
                 data: chartsData.beaches.data,
-                backgroundColor: chartsData.beaches.backgroundColor
+                backgroundColor: chartsData.beaches.backgroundColor,
+                borderWidth: 1,
+                borderColor: '#fff'
             }]
-        }, { indexAxis: 'y' });
+        }, { 
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        });
 
         createChart('touristTypeChart', 'doughnut', { 
             labels: chartsData.touristType.labels,
             datasets: [{ 
                 data: chartsData.touristType.data,
-                backgroundColor: chartsData.touristType.backgroundColor
+                backgroundColor: chartsData.touristType.backgroundColor,
+                borderWidth: 2,
+                borderColor: '#fff'
             }]
+        }, {
+            cutout: '65%'
         });
 
         createChart('visitTimeChart', 'line', { 
             labels: chartsData.visitsOverTime.labels,
             datasets: [{ 
+                label: 'Monthly Visits',
                 data: chartsData.visitsOverTime.data,
                 borderColor: chartsData.visitsOverTime.borderColor,
-                backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                borderWidth: 2
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#3b82f6',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                tension: 0.3
             }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
         });
 
         createChart('collectorChart', 'bar', { 
             labels: chartsData.collectorsapproved.labels,
             datasets: [{ 
+                label: 'Approvals',
                 data: chartsData.collectorsapproved.data,
-                backgroundColor: chartsData.collectorsapproved.backgroundColor
-            }],
+                backgroundColor: chartsData.collectorsapproved.backgroundColor,
+                borderWidth: 1,
+                borderColor: '#fff'
+            }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
         });
-    });
-    document.addEventListener("DOMContentLoaded", function () {
+        
+        // New age demographics chart
+        createChart('ageChart', 'pie', { 
+            labels: chartsData.ageDemographics.labels,
+            datasets: [{ 
+                data: chartsData.ageDemographics.data,
+                backgroundColor: chartsData.ageDemographics.backgroundColor,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        });
+
+        // Modal Functionality
         const openModalButton = document.getElementById('openModal');
         const modal = document.getElementById('nameModal');
         const closeModalButton = document.getElementById('closeModal');
@@ -196,15 +413,29 @@
         // Show the modal when "Download Report" is clicked
         openModalButton.addEventListener('click', function () {
             modal.classList.remove('hidden');
+            // Add animation class
+            setTimeout(() => {
+                modal.querySelector('.transform').classList.add('scale-100');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 10);
         });
 
         // Close the modal when "Cancel" is clicked
         closeModalButton.addEventListener('click', function () {
-            modal.classList.add('hidden');
+            modal.querySelector('.transform').classList.add('scale-95');
+            modal.querySelector('.transform').classList.remove('scale-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        });
+
+        // Close modal when clicking outside of it
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModalButton.click();
+            }
         });
     });
-
-
 </script>
 {% endblock %}
 

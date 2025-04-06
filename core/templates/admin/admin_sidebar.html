@@ -1,71 +1,166 @@
 <aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-300 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700">
     <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-        <ul class="space-y-2 font-medium">
-            <!-- Dashboard Link -->
-            <li>
-                <a href="{% url 'admin_dashboard' %}" 
-                   class="relative flex items-center p-2 rounded-lg transition 
-                      {% if request.path == '/admin/dashboard/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
-                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    <!-- SVG Icon -->
-                    <span class="ml-3">Dashboard</span>
-                </a>
-            </li>
+        <!-- Admin Profile Section -->
+        <div class="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-gray-700 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 truncate dark:text-white">
+                        Admin Portal
+                    </p>
+                    <p class="text-xs text-gray-500 truncate dark:text-gray-400">
+                        Beach Management System
+                    </p>
+                </div>
+            </div>
+        </div>
 
-            <!-- Create User Link -->
-            <li>
-                <a href="{% url 'create_user' %}" 
-                   class="relative flex items-center p-2 rounded-lg transition 
-                      {% if request.path == '/admin/create-user/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
-                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    <!-- SVG Icon -->
-                    <span class="ml-3">Create User</span>
-                </a>
-            </li>
+        <!-- Navigation Categories -->
+        <div class="space-y-6">
+            <!-- Dashboard Section -->
+            <div>
+                <h3 class="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                    Overview
+                </h3>
+                <ul class="mt-2 space-y-1">
+                    <li>
+                        <a href="{% url 'admin_dashboard' %}" 
+                           class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition duration-150 ease-in-out
+                              {% if request.path == '/admin/dashboard/' %} 
+                                 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold
+                              {% else %} 
+                                 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700
+                              {% endif %}">
+                            <svg class="flex-shrink-0 w-5 h-5 mr-3 {% if request.path == '/admin/dashboard/' %}text-blue-500 dark:text-blue-400{% else %}text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
+                                <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
+                            </svg>
+                            <span>Dashboard</span>
+                            {% if request.path == '/admin/dashboard/' %}
+                                <span class="ml-auto w-1.5 h-5 bg-blue-500 rounded-l-full"></span>
+                            {% endif %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-            <!-- Manage Users Link -->
-            <li>
-                <a href="{% url 'manage_users' %}" 
-                   class="relative flex items-center p-2 rounded-lg transition 
-                      {% if request.path == '/admin/manage-users/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
-                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    <!-- SVG Icon -->
-                    <span class="ml-3">Manage Users</span>
-                </a>
-            </li>
+            <!-- User Management Section -->
+            <div>
+                <h3 class="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                    User Management
+                </h3>
+                <ul class="mt-2 space-y-1">
+                    <li>
+                        <a href="{% url 'create_user' %}" 
+                           class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition duration-150 ease-in-out
+                              {% if request.path == '/admin/create-user/' %} 
+                                 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold
+                              {% else %} 
+                                 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700
+                              {% endif %}">
+                            <svg class="flex-shrink-0 w-5 h-5 mr-3 {% if request.path == '/admin/create-user/' %}text-blue-500 dark:text-blue-400{% else %}text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"></path>
+                            </svg>
+                            <span>Create User</span>
+                            {% if request.path == '/admin/create-user/' %}
+                                <span class="ml-auto w-1.5 h-5 bg-blue-500 rounded-l-full"></span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'manage_users' %}" 
+                           class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition duration-150 ease-in-out
+                              {% if request.path == '/admin/manage-users/' %} 
+                                 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold
+                              {% else %} 
+                                 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700
+                              {% endif %}">
+                            <svg class="flex-shrink-0 w-5 h-5 mr-3 {% if request.path == '/admin/manage-users/' %}text-blue-500 dark:text-blue-400{% else %}text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                            </svg>
+                            <span>Manage Users</span>
+                            {% if request.path == '/admin/manage-users/' %}
+                                <span class="ml-auto w-1.5 h-5 bg-blue-500 rounded-l-full"></span>
+                            {% endif %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-            <!-- Create Beach Link -->
-            <li>
-                <a href="{% url 'create_beach' %}" 
-                   class="relative flex items-center p-2 rounded-lg transition 
-                      {% if request.path == '/admin/create-beach/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
-                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    <!-- SVG Icon -->
-                    <span class="ml-3">Create Beach</span>
-                </a>
-            </li>
+            <!-- Beach Management Section -->
+            <div>
+                <h3 class="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                    Beach Management
+                </h3>
+                <ul class="mt-2 space-y-1">
+                    <li>
+                        <a href="{% url 'create_beach' %}" 
+                           class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition duration-150 ease-in-out
+                              {% if request.path == '/admin/create-beach/' %} 
+                                 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold
+                              {% else %} 
+                                 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700
+                              {% endif %}">
+                            <svg class="flex-shrink-0 w-5 h-5 mr-3 {% if request.path == '/admin/create-beach/' %}text-blue-500 dark:text-blue-400{% else %}text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Create Beach</span>
+                            {% if request.path == '/admin/create-beach/' %}
+                                <span class="ml-auto w-1.5 h-5 bg-blue-500 rounded-l-full"></span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'manage_beaches' %}" 
+                           class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition duration-150 ease-in-out
+                              {% if request.path == '/admin/manage-beaches/' %} 
+                                 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold
+                              {% else %} 
+                                 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700
+                              {% endif %}">
+                            <svg class="flex-shrink-0 w-5 h-5 mr-3 {% if request.path == '/admin/manage-beaches/' %}text-blue-500 dark:text-blue-400{% else %}text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path>
+                            </svg>
+                            <span>Manage Beaches</span>
+                            {% if request.path == '/admin/manage-beaches/' %}
+                                <span class="ml-auto w-1.5 h-5 bg-blue-500 rounded-l-full"></span>
+                            {% endif %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-            <!-- Manage Beaches Link -->
-            <li>
-                <a href="{% url 'manage_beaches' %}" 
-                   class="relative flex items-center p-2 rounded-lg transition 
-                      {% if request.path == '/admin/manage-beaches/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
-                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    <!-- SVG Icon -->
-                    <span class="ml-3">Manage Beaches</span>
-                </a>
-            </li>
-
-            <!-- Manage Tourists Link -->
-            <li>
-                <a href="{% url 'manage_tourists' %}" 
-                   class="relative flex items-center p-2 rounded-lg transition 
-                      {% if request.path == '/admin/manage-tourists/' %} text-blue-500 font-semibold {% else %} text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 {% endif %}
-                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    <!-- SVG Icon -->
-                    <span class="ml-3">Manage Tourists</span>
-                </a>
-            </li>
-        </ul>
+            <!-- Tourist Management Section -->
+            <div>
+                <h3 class="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                    Tourist Management
+                </h3>
+                <ul class="mt-2 space-y-1">
+                    <li>
+                        <a href="{% url 'manage_tourists' %}" 
+                           class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition duration-150 ease-in-out
+                              {% if request.path == '/admin/manage-tourists/' %} 
+                                 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold
+                              {% else %} 
+                                 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700
+                              {% endif %}">
+                            <svg class="flex-shrink-0 w-5 h-5 mr-3 {% if request.path == '/admin/manage-tourists/' %}text-blue-500 dark:text-blue-400{% else %}text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+                            </svg>
+                            <span>Manage Tourists</span>
+                            {% if request.path == '/admin/manage-tourists/' %}
+                                <span class="ml-auto w-1.5 h-5 bg-blue-500 rounded-l-full"></span>
+                            {% endif %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </aside>

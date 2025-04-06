@@ -5,41 +5,110 @@
 {% load static %}
 
 {% block content %}
-<div class="flex h-screen">
+<div class="flex h-screen bg-gray-50">
     {% include 'beach/beach_sidebar.html' %}  <!-- Include Sidebar -->
 
     <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
-        <h1 class="text-xl font-bold text-center text-blue-700 mb-6">QR Code Scanner</h1>
+        <div class="max-w-4xl mx-auto">
+            <!-- Header Section -->
+            <div class="mb-8 bg-white rounded-lg shadow-md p-6">
+                <h1 class="text-2xl font-bold text-blue-700 mb-2 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 6h1m-7 1a3 3 0 11-6 0 3 3 0 016 0zm6 3.5v-1m-12 0v1m12 0h-1m-12 0H7" />
+                    </svg>
+                    QR Code Scanner
+                </h1>
+                <p class="text-gray-600 text-center">Scan tourist QR codes to verify reservations</p>
+            </div>
 
-        <!-- QR Code Scanner Display (Smaller Size) -->
-        <div class="flex justify-center">
-            <div id="reader" class="border rounded-lg w-64 h-50"></div>
-        </div>
+            <!-- QR Scanner Section -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex flex-col items-center">
+                    <!-- Scanner Container with Visual Enhancement -->
+                    <div class="relative mb-6">
+                        <div id="reader" class="border-2 border-blue-400 rounded-lg w-72 h-72 shadow-inner"></div>
+                        <div class="absolute inset-0 pointer-events-none">
+                            <div class="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-blue-600 rounded-tl-lg"></div>
+                            <div class="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-blue-600 rounded-tr-lg"></div>
+                            <div class="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-blue-600 rounded-bl-lg"></div>
+                            <div class="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-blue-600 rounded-br-lg"></div>
+                        </div>
+                    </div>
 
-        <!-- Scanned QR Code Result -->
-        <p id="result" class="mt-4 text-lg font-medium text-blue-600 text-center"></p>
+                    <!-- Scanned QR Code Result with Better Styling -->
+                    <div id="result" class="min-h-8 mb-4 text-lg font-medium text-blue-600 text-center bg-blue-50 px-4 py-2 rounded-lg w-full max-w-sm"></div>
 
-        <!-- Control Buttons -->
-        <div class="mt-4 flex justify-center gap-4">
-            <button id="startScanner" class="bg-green-500 text-white px-4 py-2 rounded-lg">Start Scanning</button>
-            <button id="stopScanner" class="bg-red-500 text-white px-4 py-2 rounded-lg hidden">Stop Scanning</button>
-        </div>
+                    <!-- Control Buttons with Improved Design -->
+                    <div class="flex justify-center gap-4 w-full">
+                        <button id="startScanner" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center transition-all shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Start Scanning
+                        </button>
+                        <button id="stopScanner" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium flex items-center transition-all shadow-md hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Stop Scanning
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-        <div id="reservationTableContainer" class="mt-6">
-            <h2 class="text-xl font-bold text-center text-blue-700 mb-4">Tourist Reservations</h2>
-            <table class="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border border-gray-300 p-2">Beach</th>
-                        <th class="border border-gray-300 p-2">Date</th>
-                        <th class="border border-gray-300 p-2">People</th>
-                        <th class="border border-gray-300 p-2">Payment</th>
-                        <th class="border border-gray-300 p-2">Status</th>
-                        <th class="border border-gray-300 p-2">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="reservationTableBody"></tbody>
-            </table>
+            <!-- Reservations Table Section -->
+            <div id="reservationTableContainer" class="bg-white rounded-lg shadow-md p-6 hidden">
+                <h2 class="text-xl font-bold text-blue-700 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Tourist Reservations
+                </h2>
+                
+                <!-- Search/Filter Input -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="reservationSearch" placeholder="Search reservations..." class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Enhanced Table -->
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full border-collapse bg-white text-sm shadow-sm">
+                        <thead>
+                            <tr class="bg-blue-50">
+                                <th class="border-b border-gray-200 p-3 text-left font-medium text-blue-700">Beach</th>
+                                <th class="border-b border-gray-200 p-3 text-left font-medium text-blue-700">Date</th>
+                                <th class="border-b border-gray-200 p-3 text-left font-medium text-blue-700">People</th>
+                                <th class="border-b border-gray-200 p-3 text-left font-medium text-blue-700">Payment</th>
+                                <th class="border-b border-gray-200 p-3 text-left font-medium text-blue-700">Status</th>
+                                <th class="border-b border-gray-200 p-3 text-left font-medium text-blue-700">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservationTableBody" class="divide-y divide-gray-100">
+                            <!-- Table rows will be populated by JavaScript -->
+                            <tr class="text-gray-500 text-center">
+                                <td colspan="6" class="p-4">Scan a QR code to load reservation details</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination Controls -->
+                <div class="flex items-center justify-between mt-4">
+                    <div class="text-sm text-gray-600">
+                        Showing <span id="startEntry">0</span> to <span id="endEntry">0</span> of <span id="totalEntries">0</span> entries
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50">Previous</button>
+                        <button class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -48,14 +117,28 @@
     document.addEventListener("DOMContentLoaded", function () {
         let scanner = new Html5Qrcode("reader");
         let lastScannedQrCode = null;  // Define this variable
+        let isScanning = false;
 
+        // Start Scanner Button
         document.getElementById("startScanner").addEventListener("click", function () {
+            if (isScanning) return;
+            
+            isScanning = true;
+            document.getElementById("startScanner").classList.add("hidden");
+            document.getElementById("stopScanner").classList.remove("hidden");
+            document.getElementById("result").textContent = "Scanning...";
+            document.getElementById("result").classList.add("animate-pulse");
+            
             scanner.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: 180 },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => {
                     scanner.stop();
-                    document.getElementById("reader").innerHTML = "";
+                    isScanning = false;
+                    document.getElementById("startScanner").classList.remove("hidden");
+                    document.getElementById("stopScanner").classList.add("hidden");
+                    document.getElementById("result").classList.remove("animate-pulse");
+                    document.getElementById("result").textContent = "QR Code detected!";
                     lastScannedQrCode = decodedText; // Store the last scanned QR code
                     redirectToTokenPage(decodedText);  // Redirect to the correct page with token
                 },
@@ -63,6 +146,25 @@
                     console.error("Error scanning QR code:", errorMessage);
                 }
             );
+        });
+
+        // Stop Scanner Button
+        document.getElementById("stopScanner").addEventListener("click", function() {
+            if (!isScanning) return;
+            
+            scanner.stop().then(() => {
+                isScanning = false;
+                document.getElementById("startScanner").classList.remove("hidden");
+                document.getElementById("stopScanner").classList.add("hidden");
+                document.getElementById("result").classList.remove("animate-pulse");
+                document.getElementById("result").textContent = "";
+            });
+        });
+
+        // Reservation Search Functionality
+        document.getElementById("reservationSearch").addEventListener("input", function(e) {
+            // Add search functionality here when integrated with backend
+            console.log("Searching for:", e.target.value);
         });
 
         // Redirect to the beach_scanner_token view with the scanned token
@@ -91,9 +193,7 @@
             // Redirect to the beach_scanner_token page with the extracted token
             window.location.href = `/beach_scanner_token/${extractedToken}/`;
         }
-        
     });
-
 </script>
 
 {% endblock %}

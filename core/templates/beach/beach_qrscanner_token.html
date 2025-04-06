@@ -2,110 +2,198 @@
 
 {% block title %}Tourist Reservations{% endblock %}
 
+{% load humanize %}
+
 {% block content %}
-<div class="flex h-screen">
+<div class="flex h-screen bg-gray-50">
     {% include 'beach/beach_sidebar.html' %}
 
     <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
-        <h1 class="text-xl font-bold text-center text-blue-700 mb-6">Tourist Reservations</h1>
-
-        <!-- Tourist Information -->
-        <h2 class="text-lg font-semibold text-blue-700 mb-4">Tourist: {{ tourist.nickname }}</h2>
-        
-        <div class="mt-6">
-            <h3 class="text-lg font-semibold text-blue-700 mb-4">Reservations</h3>
-            <table class="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border border-gray-300 p-2">Beach</th>
-                        <th class="border border-gray-300 p-2">Date</th>
-                        <th class="border border-gray-300 p-2">People</th>
-                        <th class="border border-gray-300 p-2">Payment</th>
-                        <th class="border border-gray-300 p-2">Status</th>
-                        <th class="border border-gray-300 p-2">Checked In</th>
-                        <th class="border border-gray-300 p-2">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for reservation in reservations %}
-                    <tr>
-                        <td class="border border-gray-300 p-2">{{ reservation.beach.name }}</td>
-                        <td class="border border-gray-300 p-2">{{ reservation.date_reserved }}</td>
-                        <td class="border border-gray-300 p-2">{{ reservation.num_people }}</td>
-                        
-                        <!-- Payment Method -->
-                        <td class="border border-gray-300 p-2">
-                            {% if reservation.payment %}
-                                {{ reservation.payment.get_payment_method_display }}  <!-- Displays 'Cash' or 'GCash' -->
-                            {% else %}
-                                Not Paid
-                            {% endif %}
-                        </td>
-                        
-                        <!-- Payment Status -->
-                        <td class="border border-gray-300 p-2">
-                            {% if reservation.payment %}
-                                {{ reservation.payment.get_status_display }}  <!-- Displays 'Pending', 'Paid', 'Failed' -->
-                            {% else %}
-                                Not Paid
-                            {% endif %}
-                        </td>
-
-                        <td class="border border-gray-300 p-2">
-                            <form id="approval-form-{{ reservation.id }}" action="{% url 'toggle_approval' reservation.id %}" method="POST">
-                                {% csrf_token %}
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                                    <input type="checkbox" id="toggle_approval_{{ reservation.id }}" 
-                                           onclick="confirmApprovalChange(event, {{ reservation.id }})"
-                                           class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-gray-300 cursor-pointer"
-                                           {% if reservation.approved %}checked{% endif %}
-                                           {% if reservation.approved %}disabled{% endif %}>  <!-- Disable if approved -->
-                                    <label for="toggle_approval_{{ reservation.id }}" 
-                                           class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer bg-gray-300"></label>
-                                </div>
-                            </form>
-                        </td>
-                        
-                        <td class="border border-gray-300 p-2">
-                            {% if reservation.payment %}
-                                {{ reservation.payment.amount | floatformat:2|intcomma }}  <!-- Displays the payment amount -->
-                            {% else %}
-                                0.00  <!-- If not paid -->
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center p-4">No reservations found for this tourist.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="mt-4 flex justify-between items-center">
-                <div class="text-sm text-gray-700">
-                    Page {{ reservations.number }} of {{ reservations.paginator.num_pages }}
+        <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <!-- Header with Tourist Info -->
+            <div class="mb-8 border-b pb-4">
+                <h1 class="text-2xl font-bold text-blue-700 mb-2">Tourist Reservations</h1>
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-700 font-bold">{{ tourist.nickname|slice:":1" }}</span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">{{ tourist.nickname }}</h2>
+                        <p class="text-sm text-gray-500">Manage all reservations for this tourist</p>
+                    </div>
                 </div>
-                <div class="flex space-x-2">
-                    {% if reservations.has_previous %}
-                        <a href="?page=1" class="bg-blue-500 text-white py-2 px-4 rounded">First</a>
-                        <a href="?page={{ reservations.previous_page_number }}" class="bg-blue-500 text-white py-2 px-4 rounded">Previous</a>
-                    {% endif %}
-                    {% if reservations.has_next %}
-                        <a href="?page={{ reservations.next_page_number }}" class="bg-blue-500 text-white py-2 px-4 rounded">Next</a>
-                        <a href="?page={{ reservations.paginator.num_pages }}" class="bg-blue-500 text-white py-2 px-4 rounded">Last</a>
-                    {% endif %}
+            </div>
+            
+            <!-- Reservations Section -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-blue-700">Reservations</h3>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                        Total: {{ reservations.paginator.count }}
+                    </span>
+                </div>
+                
+                <!-- Responsive Table -->
+                <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                    <table class="w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Beach</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">People</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Payment</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Checked In</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for reservation in reservations %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="font-medium text-gray-800">{{ reservation.beach.name }}</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="text-sm text-gray-700">{{ reservation.date_reserved }}</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span class="text-sm text-gray-700">{{ reservation.num_people }}</span>
+                                    </div>
+                                </td>
+                                
+                                <!-- Payment Method -->
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    {% if reservation.payment %}
+                                        <span class="text-sm text-gray-700">{{ reservation.payment.get_payment_method_display }}</span>
+                                    {% else %}
+                                        <span class="text-sm text-red-500">Not Paid</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Payment Status -->
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    {% if reservation.payment %}
+                                        {% if reservation.payment.status == 'paid' %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                {{ reservation.payment.get_status_display }}
+                                            </span>
+                                        {% elif reservation.payment.status == 'pending' %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                {{ reservation.payment.get_status_display }}
+                                            </span>
+                                        {% else %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                {{ reservation.payment.get_status_display }}
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            Not Paid
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Checked In Toggle -->
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <form id="approval-form-{{ reservation.id }}" action="{% url 'toggle_approval' reservation.id %}" method="POST" class="flex items-center">
+                                        {% csrf_token %}
+                                        <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" id="toggle_approval_{{ reservation.id }}" 
+                                                   onclick="confirmApprovalChange(event, {{ reservation.id }})"
+                                                   class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-gray-300 cursor-pointer"
+                                                   {% if reservation.approved %}checked{% endif %}
+                                                   {% if reservation.approved %}disabled{% endif %}>
+                                            <label for="toggle_approval_{{ reservation.id }}" 
+                                                   class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer bg-gray-300"></label>
+                                        </div>
+                                        <span class="text-xs text-gray-500">
+                                            {% if reservation.approved %}Checked In{% else %}Not Checked In{% endif %}
+                                        </span>
+                                    </form>
+                                </td>
+                                
+                                <!-- Amount -->
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="text-sm font-medium">
+                                        {% if reservation.payment %}
+                                            <span class="text-gray-900">₱{{ reservation.payment.amount | floatformat:2|intcomma }}</span>
+                                        {% else %}
+                                            <span class="text-gray-400">₱0.00</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="px-4 py-8 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p class="text-gray-600 font-medium">No reservations found for this tourist.</p>
+                                        <p class="text-gray-500 text-sm mt-1">Reservations will appear here once created.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-lg border border-gray-200">
+                    <div class="text-sm text-gray-700 mb-4 sm:mb-0">
+                        Showing <span class="font-medium">{{ reservations.start_index }}</span> to 
+                        <span class="font-medium">{{ reservations.end_index }}</span> of 
+                        <span class="font-medium">{{ reservations.paginator.count }}</span> reservations
+                    </div>
+                    <div class="inline-flex rounded-md shadow-sm">
+                        <a href="?page=1" class="{% if not reservations.has_previous %}opacity-50 cursor-not-allowed{% endif %} relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                            </svg>
+                            First
+                        </a>
+                        <a href="{% if reservations.has_previous %}?page={{ reservations.previous_page_number }}{% else %}#{% endif %}" 
+                           class="{% if not reservations.has_previous %}opacity-50 cursor-not-allowed{% endif %} relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </a>
+                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                            Page {{ reservations.number }} of {{ reservations.paginator.num_pages }}
+                        </span>
+                        <a href="{% if reservations.has_next %}?page={{ reservations.next_page_number }}{% else %}#{% endif %}" 
+                           class="{% if not reservations.has_next %}opacity-50 cursor-not-allowed{% endif %} relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        <a href="?page={{ reservations.paginator.num_pages }}" 
+                           class="{% if not reservations.has_next %}opacity-50 cursor-not-allowed{% endif %} relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Last
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
+
 {% block extra_styles %}
 <style>
     /* Toggle styles */
     .toggle-checkbox:checked {
         right: 0;
         background-color: #4CAF50; /* Green for active state */
+        border-color: #4CAF50;
     }
     
     .toggle-checkbox:checked + .toggle-label {
@@ -114,21 +202,20 @@
 
     .toggle-label {
         background-color: #ccc; /* Light gray background for inactive state */
+        transition: background-color 0.3s ease;
     }
 
-    .toggle-text {
-        left: 0;
-        color: #333;
-        text-align: center;
-        width: 100%;
-        transition: all 0.2s ease;
-        position: absolute;
-        top: -20px; /* Move the text up a little bit */
+    .toggle-checkbox {
+        transition: all 0.3s ease;
     }
 
-    .toggle-checkbox:checked ~ .toggle-text {
-        right: 0;
-        color: green;
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
     }
 </style>
 {% endblock %}

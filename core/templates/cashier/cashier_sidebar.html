@@ -1,43 +1,170 @@
-<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-300 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
-    <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-        <ul class="space-y-2 font-medium">
-            <!-- Dashboard -->
-            <li>
-                <a href="{% url 'cashier_dashboard' %}" class="relative flex items-center p-2 rounded-lg
-                    {% if request.path == '/cashier_dashboard/' %}
-                        bg-gray-100 dark:bg-gray-700 text-blue-500 font-semibold
-                    {% else %}
-                        text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700
-                    {% endif %}
-                    group after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    
-                    <svg class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 {% if request.path == '/cashier_dashboard/' %}text-blue-500{% else %}group-hover:text-gray-900 dark:group-hover:text-white{% endif %}" 
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
-                        <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"/>
-                        <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
-                    </svg>
-                    <span class="ml-3">Dashboard</span>
-                </a>
-            </li>
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 sm:translate-x-0 dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900 dark:border-gray-700 shadow-sm" aria-label="Sidebar">
+    <div class="h-full px-3 pb-4 overflow-y-auto">
+        <!-- User Profile Section -->
+        <div class="mb-6 pb-5 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center px-2">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm">
+                        <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
+                        </svg>
+                    </div>
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-700"></span>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-semibold text-gray-800 dark:text-white">Cashier</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Online</p>
+                </div>
+            </div>
+        </div>
 
-            <!-- View Transactions -->
-            <li>
-                <a href="{% url 'cashier_transactions' %}" class="relative flex items-center p-2 rounded-lg
-                    {% if request.path == '/cashier_transactions/' %}
-                        bg-gray-100 dark:bg-gray-700 text-blue-500 font-semibold
-                    {% else %}
-                        text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700
-                    {% endif %}
-                    group after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full">
-                    
-                    <svg class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 {% if request.path == '/cashier_transactions/' %}text-blue-500{% else %}group-hover:text-gray-900 dark:group-hover:text-white{% endif %}" 
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 16v-3h.375a.626.626 0 0 1 .625.626v1.749a.626.626 0 0 1-.626.625H6Zm6-2.5a.5.5 0 1 1 1 0v2a.5.5 0 0 1-1 0v-2Z"/>
-                        <path fill-rule="evenodd" d="M11 7V2h7a2 2 0 0 1 2 2v5h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2H3a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h6a2 2 0 0 0 2-2Zm7.683 6.006 1.335-.024-.037-2-1.327.024a2.647 2.647 0 0 0-2.636 2.647v1.706a2.647 2.647 0 0 0 2.647 2.647H20v-2h-1.335a.647.647 0 0 1-.647-.647v-1.706a.647.647 0 0 1 .647-.647h.018ZM5 11a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1.376A2.626 2.626 0 0 0 9 15.375v-1.75A2.626 2.626 0 0 0 6.375 11H5Zm7.5 0a2.5 2.5 0 0 0-2.5 2.5v2a2.5 2.5 0 0 0 5 0v-2a2.5 2.5 0 0 0-2.5-2.5Z" clip-rule="evenodd"/>
+        <!-- Navigation Menu -->
+        <div class="mb-6">
+            <h5 class="px-3 mb-3 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Main Menu</h5>
+            <ul class="space-y-2 font-medium">
+                <!-- Dashboard -->
+                <li>
+                    <a href="{% url 'cashier_dashboard' %}" class="flex items-center p-2.5 rounded-lg group transition-all duration-200
+                        {% if request.path == '/cashier_dashboard/' %}
+                            bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold
+                        {% else %}
+                            text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50
+                        {% endif %}">
+                        
+                        <div class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg
+                            {% if request.path == '/cashier_dashboard/' %}
+                                bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300
+                            {% else %}
+                                bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-gray-600 group-hover:text-gray-700 dark:group-hover:text-white
+                            {% endif %}">
+                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
+                                <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"/>
+                                <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
+                            </svg>
+                        </div>
+                        <span class="ml-3 flex-1">Dashboard</span>
+                        {% if request.path == '/cashier_dashboard/' %}
+                            <span class="inline-flex items-center justify-center w-3 h-3 p-3 ml-3 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">
+                                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                                </svg>
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <!-- View Transactions -->
+                <li>
+                    <a href="{% url 'cashier_transactions' %}" class="flex items-center p-2.5 rounded-lg group transition-all duration-200
+                        {% if request.path == '/cashier_transactions/' %}
+                            bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold
+                        {% else %}
+                            text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50
+                        {% endif %}">
+                        
+                        <div class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg
+                            {% if request.path == '/cashier_transactions/' %}
+                                bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300
+                            {% else %}
+                                bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-gray-600 group-hover:text-gray-700 dark:group-hover:text-white
+                            {% endif %}">
+                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 16v-3h.375a.626.626 0 0 1 .625.626v1.749a.626.626 0 0 1-.626.625H6Zm6-2.5a.5.5 0 1 1 1 0v2a.5.5 0 0 1-1 0v-2Z"/>
+                                <path fill-rule="evenodd" d="M11 7V2h7a2 2 0 0 1 2 2v5h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2H3a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h6a2 2 0 0 0 2-2Zm7.683 6.006 1.335-.024-.037-2-1.327.024a2.647 2.647 0 0 0-2.636 2.647v1.706a2.647 2.647 0 0 0 2.647 2.647H20v-2h-1.335a.647.647 0 0 1-.647-.647v-1.706a.647.647 0 0 1 .647-.647h.018ZM5 11a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1.376A2.626 2.626 0 0 0 9 15.375v-1.75A2.626 2.626 0 0 0 6.375 11H5Zm7.5 0a2.5 2.5 0 0 0-2.5 2.5v2a2.5 2.5 0 0 0 5 0v-2a2.5 2.5 0 0 0-2.5-2.5Z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <span class="ml-3 flex-1">View Transactions</span>
+                        {% if request.path == '/cashier_transactions/' %}
+                            <span class="inline-flex items-center justify-center w-3 h-3 p-3 ml-3 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">
+                                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                                </svg>
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+                
+                <!-- Generate Reports (New) -->
+                <li>
+                    <a href="#" class="flex items-center p-2.5 rounded-lg group transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                        <div class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-gray-600 group-hover:text-gray-700 dark:group-hover:text-white">
+                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M5 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5Zm3 7h8a1 1 0 0 1 0 2H8a1 1 0 0 1 0-2Zm0 4h8a1 1 0 0 1 0 2H8a1 1 0 0 1 0-2Z"/>
+                            </svg>
+                        </div>
+                        <span class="ml-3 flex-1">Reports</span>
+                        <svg class="w-3 h-3 text-gray-400 transition-transform transform group-hover:rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                        </svg>
+                    </a>
+                    <ul class="py-1 pl-5 space-y-1">
+                        <li>
+                            <a href="{% url 'cashier_generate_report' %}" class="flex items-center p-2 text-sm text-gray-700 rounded-lg pl-9 group dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                                    <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"/>
+                                    <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM9 13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1h6v1Zm3-3H4V9h8v1Z"/>
+                                </svg>
+                                PDF Report
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'cashier_generate_csv_report' %}" class="flex items-center p-2 text-sm text-gray-700 rounded-lg pl-9 group dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                                    <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM9 13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1h6v1Zm3-3H4V9h8v1Z"/>
+                                </svg>
+                                CSV Report
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Quick Stats Section -->
+        <div class="mt-8 px-3">
+            <h5 class="mb-3 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Quick Stats</h5>
+            <div class="space-y-3">
+                <div class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Today's Sales</p>
+                        <div class="inline-flex items-center text-xs text-green-600 dark:text-green-400">
+                            <svg class="w-3 h-3 mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 16">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 14V2m0 0L1 6m4-4 4 4"/>
+                            </svg>
+                            +12%
+                        </div>
+                    </div>
+                    <p class="text-lg font-semibold text-gray-800 dark:text-white">₱{{ todays_earnings|default:"0.00" }}</p>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1 dark:bg-gray-700">
+                        <div class="bg-green-600 h-1.5 rounded-full dark:bg-green-500" style="width: 75%"></div>
+                    </div>
+                </div>
+                
+                <div class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Pending</p>
+                    </div>
+                    <p class="text-lg font-semibold text-gray-800 dark:text-white">{{ pending_payments|default:"0" }}</p>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1 dark:bg-gray-700">
+                        <div class="bg-yellow-500 h-1.5 rounded-full dark:bg-yellow-600" style="width: 45%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="mt-auto pt-8">
+            <div class="px-3 py-3 mt-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"/>
                     </svg>
-                    <span class="ml-3">View Transactions</span>
-                </a>
-            </li>
-        </ul>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-blue-800 dark:text-blue-300">Need Help?</p>
+                        <p class="text-xs text-blue-700 dark:text-blue-400">Contact support</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</aside>
+</aside>    

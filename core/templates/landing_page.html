@@ -1,75 +1,206 @@
 {% extends 'base.html' %}
 
-{% block title %}Welcome to Beach Resort{% endblock %}
+{% block title %}Welcome to Anda Public Beach Resort{% endblock %}
 
 {% load static %}
 
 {% block content %}
-
     <!-- Hero Section -->
-    <section class="bg-cover bg-center bg-no-repeat py-12 text-center"
-            style="background-image: url('{% static 'images/anda.webp' %}');">
-
-        <h1 class="text-3xl font-bold text-blue-950 drop-shadow-lg">
-            Welcome to Anda Public Beach Resort!
-        </h1>
-        <p class="mt-4 text-black drop-shadow-lg">
-            Experience the beauty of our breathtaking beaches and crystal-clear waters.
-        </p>
-        
-        
+    <section class="relative bg-cover bg-center bg-no-repeat h-96 flex items-center justify-center"
+             style="background-image: url('{% static 'images/anda.webp' %}');">
+        <div class="absolute inset-0 bg-black bg-opacity-30"></div>
+        <div class="container mx-auto px-6 relative z-10 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Welcome to Anda Public Beach Resort
+            </h1>
+            <p class="text-xl text-white mb-8 max-w-2xl mx-auto">
+                Experience paradise on earth with our pristine beaches and crystal-clear waters
+            </p>
+            <a href="#explore" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 inline-block">
+                Explore Our Beaches
+            </a>
+        </div>
     </section>
 
-    <section class="container mx-auto p-6 bg-gray-50 rounded-lg">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Explore Our Public Beaches</h2>
-    
-        <div class="flex flex-wrap -mx-2 justify-center">
-            {% for beach in beaches %}
-            <div class="w-full sm:w-1/2 md:w-1/3 lg:w-1/5 px-2 mb-6">
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <img src="{{ beach.image.url }}" alt="{{ beach.name }}" 
-                        class="w-full h-40 object-cover cursor-pointer"
-                        onclick="openImageModal('{{ beach.image.url }}')">
-                    <div class="p-4">
-                        <h3 class="text-sm font-semibold text-gray-900">{{ beach.name }}</h3>
-                        <p class="text-gray-500 text-xs mt-2"><strong>Location:</strong> {{ beach.location }}</p>
-                        <p class="text-gray-600 text-xs mt-2">{{ beach.description }}</p>
+    <!-- Features Section -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-wrap -mx-4">
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="text-center p-6 hover:shadow-lg rounded-lg transition duration-300">
+                        <div class="text-blue-600 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Pristine Beaches</h3>
+                        <p class="text-gray-600">Enjoy our white sand beaches that are maintained daily for your perfect getaway</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="text-center p-6 hover:shadow-lg rounded-lg transition duration-300">
+                        <div class="text-blue-600 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Open All Year</h3>
+                        <p class="text-gray-600">Visit our beaches any time of the year and experience different seasonal beauties</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="text-center p-6 hover:shadow-lg rounded-lg transition duration-300">
+                        <div class="text-blue-600 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Great Amenities</h3>
+                        <p class="text-gray-600">From beach chairs to water activities, we have everything for your comfort</p>
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
     </section>
-    
-    
 
-    <!-- Beach Image Modal -->
-    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center hidden">
-        <div class="relative bg-white p-6 rounded-lg shadow-lg text-center">
-            <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl" onclick="closeImageModal()">✖</button>
-            <img id="modalImage" src="" alt="Beach Image" class="max-w-full h-auto rounded-lg">
+    <!-- Beach Showcase Section -->
+    <section id="explore" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">Explore Our Public Beaches</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Discover the unique charm of each beach in our resort, each offering its own breathtaking view and experience</p>
+            </div>
+            
+            <div class="flex flex-wrap -mx-3 justify-center">
+                {% for beach in beaches %}
+                <div class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 px-3 mb-8">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 h-full flex flex-col">
+                        <div class="relative overflow-hidden">
+                            <img src="{{ beach.image.url }}" alt="{{ beach.name }}" 
+                                class="w-full h-56 object-cover transition duration-500 transform hover:scale-105 cursor-pointer"
+                                onclick="openImageModal('{{ beach.image.url }}')">
+                            <div class="absolute bottom-0 left-0 bg-blue-600 text-white py-1 px-3 text-sm">
+                                {{ beach.location }}
+                            </div>
+                        </div>
+                        <div class="p-6 flex-grow">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ beach.name }}</h3>
+                            <p class="text-gray-600 mb-4">{{ beach.description }}</p>
+                            <button class="mt-auto text-blue-600 hover:text-blue-800 font-medium inline-flex items-center" 
+                                    onclick="openImageModal('{{ beach.image.url }}')">
+                                View Beach
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 bg-blue-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">What Our Visitors Say</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Hear from people who have experienced the beauty of Anda Public Beach Resort</p>
+            </div>
+            
+            <div class="flex flex-wrap -mx-4">
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="flex items-center mb-4">
+                            <div class="text-yellow-400 flex mr-2">
+                                {% for i in "12345" %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="text-gray-600 italic mb-4">"The most beautiful beach I've ever visited. Crystal clear waters and pristine white sand. Will definitely come back!"</p>
+                        <p class="font-semibold text-gray-800">Maria Santos</p>
+                        <p class="text-sm text-gray-500">Manila, Philippines</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="flex items-center mb-4">
+                            <div class="text-yellow-400 flex mr-2">
+                                {% for i in "12345" %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="text-gray-600 italic mb-4">"Perfect for family vacations. The kids loved playing in the safe, shallow waters. The staff were incredibly helpful too."</p>
+                        <p class="font-semibold text-gray-800">John Rodriguez</p>
+                        <p class="text-sm text-gray-500">Cebu, Philippines</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="flex items-center mb-4">
+                            <div class="text-yellow-400 flex mr-2">
+                                {% for i in "12345" %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="text-gray-600 italic mb-4">"A hidden gem! I came for a weekend but ended up staying the whole week. The sunsets here are absolutely magical."</p>
+                        <p class="font-semibold text-gray-800">Anna Lee</p>
+                        <p class="text-sm text-gray-500">Davao, Philippines</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-blue-700 text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-6">Ready to Experience Paradise?</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Plan your visit to Anda Public Beach Resort today and create memories that will last a lifetime.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#" class="bg-white text-blue-700 hover:bg-gray-100 font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Contact Us
+                </a>
+                <a href="#" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-700 font-bold py-3 px-6 rounded-lg transition duration-300">
+                    View Map
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Beach Image Modal (Improved) -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center hidden z-50">
+        <div class="relative bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4">
+            <button class="absolute top-4 right-4 text-gray-800 hover:text-gray-600 bg-white rounded-full p-2 shadow-md transition duration-300" 
+                    onclick="closeImageModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <img id="modalImage" src="" alt="Beach Image" class="w-full h-auto rounded-lg">
         </div>
     </div>
 
-
-
-    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden">
-        <div class="relative">
-            <img id="modalImage" class="max-w-full max-h-screen object-contain" src="" alt="Large view">
-            <button id="closeModal" class="absolute top-4 right-4 bg-white text-black rounded-full p-2">X</button>
-        </div>
-    </div>
-
-    
     <script>
-        
         function openImageModal(imageUrl) {
             document.getElementById("modalImage").src = imageUrl;
             document.getElementById("imageModal").classList.remove("hidden");
+            document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
         }
         
         function closeImageModal() {
             document.getElementById("imageModal").classList.add("hidden");
+            document.body.style.overflow = ''; // Re-enable scrolling
         }
     
         // Close modal when clicking outside the image
@@ -79,35 +210,11 @@
             }
         });
 
-
-
-        
-        // Modal Image Functionality
-        const image = document.getElementById("bitoonImage");
-        const modal = document.getElementById("imageModal");
-        const modalImage = document.getElementById("modalImage");
-        const closeModal = document.getElementById("closeModal");
-
-        image?.addEventListener("click", () => {
-            modal?.classList.remove("hidden");
-            modalImage.src = image.src;
-        });
-
-        closeModal?.addEventListener("click", () => {
-            modal?.classList.add("hidden");
-        });
-
-        modal?.addEventListener("click", (e) => {
-            if (e.target === modal) {
-                modal.classList.add("hidden");
+        // Close modal with Escape key
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") {
+                closeImageModal();
             }
         });
-
-
     </script>
-    
-
-    
-    
-
 {% endblock %}

@@ -7,174 +7,294 @@
 {% load humanize %}
 
 {% block content %}
-<div class="flex h-screen">
+<div class="flex h-screen bg-gray-50">
     {% include 'cashier/cashier_sidebar.html' %}
-    <div class="flex-1 p-6 sm:ml-64">
-        <h2 class="text-2xl font-semibold mb-4 text-blue-700 text-center">Transaction History</h2>
-
-        <h3 class="text-xl font-semibold mb-2 text-blue-600">GCash Transactions</h3>
-        
-        <table class="w-full bg-white border border-gray-300 rounded-lg shadow-md mb-6">
-            <thead class="bg-blue-600 text-white">
-                <tr>
-                    <th class="py-2 px-4">Date</th>
-                    <th class="py-2 px-4">Gcash Reference</th>
-                    <th class="py-2 px-4">Amount</th>
-                    <th class="py-2 px-4">Nickname</th>
-                    <th class="py-2 px-4">Payment Method</th>
-                    <th class="py-2 px-4">Status</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700">
-                {% for payment in gcash_payments %}
-                {% if payment.payment_method == "gcash" %}
-                <tr class="border-t border-gray-200 text-center">
-                    <td class="px-3 py-2">{{ payment.created_at|date:"F j, Y" }}</td>
-                    <td class="px-3 py-2">{{ payment.gcash_reference_number }}</td>
-                    <td class="px-3 py-2 font-semibold text-green-600">₱{{ payment.amount|intcomma }}</td>
-                    <td class="px-3 py-2">{{ payment.reservation.tourist.nickname|default:"N/A" }}</td>
-                    <td class="px-3 py-2 text-gray-700">{{ payment.get_payment_method_display }}</td>
-                    <td class="px-3 py-2">
-                        <span class="px-3 py-1 rounded text-white text-xs font-semibold
-                            {% if payment.status == 'paid' %} bg-green-500
-                            {% elif payment.status == 'pending' %} bg-yellow-700
-                            {% else %} bg-red-500
-                            {% endif %}">
-                            {{ payment.get_status_display }}
-                        </span>
-                    </td>
-                </tr>
-                {% endif %}
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center py-4 text-gray-500">No GCash transactions found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div class="total-amount mt-4">
-            <h3 class="text-xl font-semibold">Total Amount: ₱{{ total_gcash_amount|floatformat:2|intcomma }}</h3>
-        </div>
-
-        
-        <div class="max-w-4xl mx-auto mt-6 bg-white p-6 rounded shadow-md">
-            <form method="GET" action="{% url 'cashier_transactions' %}" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="flex-1 p-6 sm:ml-64 overflow-y-auto">
+        <div class="max-w-7xl mx-auto">
+            <!-- Page Header -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Transaction History</h2>
+                <p class="text-gray-600">View and manage all payment transactions</p>
                 
-                <div>
-                    <label for="search_beach" class="block text-gray-700 text-sm">Select Beach</label>
-                    <select id="search_beach" name="search_beach" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
-                        <option value="">All Beaches</option>
-                        {% for beach in beaches %}
-                            <option value="{{ beach.id }}" {% if request.GET.search_beach == beach.id|stringformat:"s" %}selected{% endif %}>
-                                {{ beach.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">GCash Transactions</p>
+                                <p class="text-lg font-bold text-blue-700">₱{{ total_gcash_amount|floatformat:2|intcomma }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-100 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Cash Transactions</p>
+                                <p class="text-lg font-bold text-green-700">₱{{ total_cash_amount|floatformat:2|intcomma }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="search_payment_status" class="block text-gray-700 text-sm">Select Payment Status</label>
-                    <select id="search_payment_status" name="search_payment_status" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
-                        <option value="">All Payment Statuses</option>
-                        <option value="paid" {% if request.GET.search_payment_status == 'paid' %}selected{% endif %}>Paid</option>
-                        <option value="pending" {% if request.GET.search_payment_status == 'pending' %}selected{% endif %}>Pending</option>
-                        <!-- Add other statuses if needed -->
-                    </select>
-                </div>
+            </div>
 
-                <div>
-                    <label for="search_date" class="block text-gray-700 text-sm">Filter by Date</label>
-                    <input type="date" id="search_date" name="search_date" value="{{ request.GET.search_date }}" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
-                </div>
-
-                <div>
-                    <label for="search_approved_by" class="block text-gray-700 text-sm">Select Collector (Approved By)</label>
-                    <select id="search_approved_by" name="search_approved_by" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400">
-                        <option value="">All Collectors</option>
-                        {% for collector in collectors %}
-                            <option value="{{ collector.id }}" {% if request.GET.search_approved_by == collector.id|stringformat:"s" %}selected{% endif %}>
-                                {{ collector.first_name }} {{ collector.last_name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="col-span-1 md:col-span-4">
-                    <button type="submit" class="w-full bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
-                        🔍 Search
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Filter Transactions</h3>
+                    <button id="toggleFilters" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        <span class="hidden" id="hideFiltersText">Hide Filters</span>
+                        <span id="showFiltersText">Show Filters</span>
                     </button>
                 </div>
-            </form>
-        </div>
-
-        <h3 class="text-xl font-semibold mb-4 text-blue-600">Cash Transactions</h3>
-        <table class="w-full bg-white border border-gray-300 rounded-lg shadow-md">
-            <thead class="bg-blue-600 text-white">
-                <tr>
-                    <th class="py-2 px-4">Date</th>
-                    <th class="py-2 px-4">Amount</th>
-                    <th class="py-2 px-4">Nickname</th>
-                    <th class="py-2 px-4">Selected Beach</th>
-                    <th class="py-2 px-4">Payment Method</th>
-                    <th class="py-2 px-4">Status</th>
-                    <th class="py-2 px-4">Action</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700">
-                {% for payment in cash_payments %}
-                {% if payment.payment_method == "cash" %}
-                <tr class="border-t border-gray-200 text-center">
-                    <td class="px-3 py-2">{{ payment.created_at|date:"F j, Y" }}</td>
-                    <td class="px-3 py-2 font-semibold text-green-600">₱{{ payment.amount|intcomma }}</td>
-                    <td class="px-3 py-2">{{ payment.reservation.tourist.nickname|default:"N/A" }}</td>
-                    <td class="px-3 py-2">{{ payment.reservation.beach.name|default:"N/A" }}</td>
-                    <td class="px-3 py-2 text-gray-700">{{ payment.get_payment_method_display }}</td>
-                    <td class="px-3 py-2">
-                        <span class="px-3 py-1 rounded text-white text-xs font-semibold
-                            {% if payment.status == 'paid' %} bg-green-500
-                            {% elif payment.status == 'pending' %} bg-yellow-700
-                            {% else %} bg-red-500
-                            {% endif %}">
-                            {{ payment.get_status_display }}
-                        </span>
-                    </td>
-                    <td class="px-3 py-2">
-                        {% if payment.reservation.approved_by %}
-                            {{ payment.reservation.approved_by.first_name }} {{ payment.reservation.approved_by.last_name }}
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endif %}
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center py-4 text-gray-500">No cash transactions found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-        <!-- Pagination Controls -->
-        <div class="mt-4 flex justify-between items-center">
-            <div class="text-sm text-gray-700">
-                Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-            </div>
-            <div class="flex space-x-2">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">First</a>
-                    <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Previous</a>
-                {% endif %}
                 
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Last</a>
-                {% endif %}
+                <div id="filterForm" class="hidden">
+                    <form method="GET" action="{% url 'cashier_transactions' %}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="search_beach" class="block text-gray-700 text-sm font-medium mb-1">Beach</label>
+                            <select id="search_beach" name="search_beach" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                                <option value="">All Beaches</option>
+                                {% for beach in beaches %}
+                                    <option value="{{ beach.id }}" {% if request.GET.search_beach == beach.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ beach.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="search_payment_status" class="block text-gray-700 text-sm font-medium mb-1">Payment Status</label>
+                            <select id="search_payment_status" name="search_payment_status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                                <option value="">All Statuses</option>
+                                <option value="paid" {% if request.GET.search_payment_status == 'paid' %}selected{% endif %}>Paid</option>
+                                <option value="pending" {% if request.GET.search_payment_status == 'pending' %}selected{% endif %}>Pending</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="search_date" class="block text-gray-700 text-sm font-medium mb-1">Date</label>
+                            <input type="date" id="search_date" name="search_date" value="{{ request.GET.search_date }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                        </div>
+                        <div>
+                            <label for="search_approved_by" class="block text-gray-700 text-sm font-medium mb-1">Collector</label>
+                            <select id="search_approved_by" name="search_approved_by" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                                <option value="">All Collectors</option>
+                                {% for collector in collectors %}
+                                    <option value="{{ collector.id }}" {% if request.GET.search_approved_by == collector.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ collector.first_name }} {{ collector.last_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="md:col-span-2 lg:col-span-4">
+                            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                Apply Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div class="total-amount mt-4">
-            <h3 class="text-xl font-semibold">Total Amount: ₱{{ total_cash_amount|floatformat:2|intcomma }}</h3>
+
+            <!-- GCash Transactions -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-blue-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        GCash Transactions
+                    </h3>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                        Total: ₱{{ total_gcash_amount|floatformat:2|intcomma }}
+                    </span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr class="bg-blue-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th class="px-4 py-3 border-b">Date</th>
+                                <th class="px-4 py-3 border-b">Ref. Number</th>
+                                <th class="px-4 py-3 border-b">Amount</th>
+                                <th class="px-4 py-3 border-b">Nickname</th>
+                                <th class="px-4 py-3 border-b">Payment Method</th>
+                                <th class="px-4 py-3 border-b">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for payment in gcash_payments %}
+                            {% if payment.payment_method == "gcash" %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">{{ payment.created_at|date:"F j, Y" }}</td>
+                                <td class="px-4 py-3 text-sm font-medium">{{ payment.gcash_reference_number }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-green-600">₱{{ payment.amount|intcomma }}</td>
+                                <td class="px-4 py-3 text-sm">{{ payment.reservation.tourist.nickname|default:"N/A" }}</td>
+                                <td class="px-4 py-3 text-sm">{{ payment.get_payment_method_display }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium
+                                        {% if payment.status == 'paid' %} bg-green-100 text-green-800
+                                        {% elif payment.status == 'pending' %} bg-yellow-100 text-yellow-800
+                                        {% else %} bg-red-100 text-red-800
+                                        {% endif %}">
+                                        {{ payment.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p class="mt-2 font-medium">No GCash transactions found.</p>
+                                    <p class="text-sm">Transactions will appear here once processed.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cash Transactions -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-green-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                        </svg>
+                        Cash Transactions
+                    </h3>
+                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                        Total: ₱{{ total_cash_amount|floatformat:2|intcomma }}
+                    </span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr class="bg-green-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th class="px-4 py-3 border-b">Date</th>
+                                <th class="px-4 py-3 border-b">Amount</th>
+                                <th class="px-4 py-3 border-b">Nickname</th>
+                                <th class="px-4 py-3 border-b">Beach</th>
+                                <th class="px-4 py-3 border-b">Payment Method</th>
+                                <th class="px-4 py-3 border-b">Status</th>
+                                <th class="px-4 py-3 border-b">Collected By</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for payment in cash_payments %}
+                            {% if payment.payment_method == "cash" %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">{{ payment.created_at|date:"F j, Y" }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-green-600">₱{{ payment.amount|intcomma }}</td>
+                                <td class="px-4 py-3 text-sm">{{ payment.reservation.tourist.nickname|default:"N/A" }}</td>
+                                <td class="px-4 py-3 text-sm">{{ payment.reservation.beach.name|default:"N/A" }}</td>
+                                <td class="px-4 py-3 text-sm">{{ payment.get_payment_method_display }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium
+                                        {% if payment.status == 'paid' %} bg-green-100 text-green-800
+                                        {% elif payment.status == 'pending' %} bg-yellow-100 text-yellow-800
+                                        {% else %} bg-red-100 text-red-800
+                                        {% endif %}">
+                                        {{ payment.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm">
+                                    {% if payment.reservation.approved_by %}
+                                        {{ payment.reservation.approved_by.first_name }} {{ payment.reservation.approved_by.last_name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p class="mt-2 font-medium">No cash transactions found.</p>
+                                    <p class="text-sm">Transactions will appear here once processed.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center">
+                    <div class="text-sm text-gray-700 mb-2 sm:mb-0">
+                        Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </div>
+                    <div class="flex space-x-1">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition duration-200">First</a>
+                            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition duration-200">Previous</a>
+                        {% else %}
+                            <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded cursor-not-allowed">First</span>
+                            <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded cursor-not-allowed">Previous</span>
+                        {% endif %}
+                        
+                        <span class="px-3 py-1 bg-blue-600 text-white rounded">{{ page_obj.number }}</span>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition duration-200">Next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition duration-200">Last</a>
+                        {% else %}
+                            <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded cursor-not-allowed">Next</span>
+                            <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded cursor-not-allowed">Last</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
 </div>
+
+<script>
+    // Toggle filter form visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleFilters = document.getElementById('toggleFilters');
+        const filterForm = document.getElementById('filterForm');
+        const showFiltersText = document.getElementById('showFiltersText');
+        const hideFiltersText = document.getElementById('hideFiltersText');
+        
+        // Check if any filters are applied
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasFilters = urlParams.has('search_beach') || 
+                          urlParams.has('search_payment_status') || 
+                          urlParams.has('search_date') || 
+                          urlParams.has('search_approved_by');
+        
+        // Show filters by default if any are applied
+        if (hasFilters) {
+            filterForm.classList.remove('hidden');
+            showFiltersText.classList.add('hidden');
+            hideFiltersText.classList.remove('hidden');
+        }
+        
+        toggleFilters.addEventListener('click', function() {
+            filterForm.classList.toggle('hidden');
+            showFiltersText.classList.toggle('hidden');
+            hideFiltersText.classList.toggle('hidden');
+        });
+    });
+</script>
 {% endblock %}

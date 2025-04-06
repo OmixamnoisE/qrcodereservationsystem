@@ -5,104 +5,226 @@
 {% load static %}
 
 {% block content %}
-<div class="flex h-screen">
+<div class="flex h-screen bg-gray-50">
     {% include 'admin/admin_sidebar.html' %}  
 
     <div class="flex-1 overflow-y-auto p-6 sm:ml-64">
-        <div class="section bg-white p-6 rounded-lg shadow-lg mb-8 max-w-3xl mx-auto">
-            <h2 class="text-2xl font-semibold text-blue-700 mb-6 text-center">Create User Account</h2>
+        <div class="max-w-3xl mx-auto">
+            <!-- Page Header -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Account Management</h1>
+                <p class="text-gray-600">Create a new user account with the form below</p>
+            </div>
 
-            {% if messages %}
-                <div class="mb-6">
-                    {% for message in messages %}
-                        <div class="p-4 mb-4 bg-green-100 text-green-800 border border-green-300 rounded">
-                            {{ message }}
+            <!-- Main Content Card -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <!-- Card Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                        </svg>
+                        Create User Account
+                    </h2>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-6">
+                    {% if messages %}
+                        <div class="mb-6">
+                            {% for message in messages %}
+                                <div class="p-4 mb-4 bg-green-100 text-green-800 border-l-4 border-green-500 rounded-r flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" action="{% url 'create_user' %}" enctype="multipart/form-data" id="create-user-form" class="space-y-6">
+                        {% csrf_token %}
+
+                        <!-- Form Layout - Two columns on larger screens -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Left Column -->
+                            <div class="space-y-6">
+                                <!-- Personal Information Section -->
+                                <div class="pb-3 mb-4 border-b border-gray-200">
+                                    <h3 class="text-sm font-medium uppercase tracking-wider text-gray-500">Personal Information</h3>
+                                </div>
+                                
+                                <!-- First Name -->
+                                <div>
+                                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                                    <input type="text" id="first_name" name="first_name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" value="{{ request.POST.first_name }}" required>
+                                </div>
+
+                                <!-- Middle Name (Optional) -->
+                                <div>
+                                    <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                                    <input type="text" id="middle_name" name="middle_name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" value="{{ request.POST.middle_name }}">
+                                </div>
+
+                                <!-- Last Name -->
+                                <div>
+                                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+                                    <input type="text" id="last_name" name="last_name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" value="{{ request.POST.last_name }}" required>
+                                </div>
+
+                                <!-- Nickname (Optional) -->
+                                <div>
+                                    <label for="nickname" class="block text-sm font-medium text-gray-700 mb-1">Nickname</label>
+                                    <input type="text" id="nickname" name="nickname" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" value="{{ request.POST.nickname }}" placeholder="Enter your nickname">
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="space-y-6">
+                                <!-- Account Information Section -->
+                                <div class="pb-3 mb-4 border-b border-gray-200">
+                                    <h3 class="text-sm font-medium uppercase tracking-wider text-gray-500">Account Information</h3>
+                                </div>
+                                
+                                <!-- Username -->
+                                <div>
+                                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <input type="text" id="username" name="username" class="w-full border border-gray-300 rounded-lg pl-10 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" value="{{ request.POST.username }}" required>
+                                    </div>
+                                </div>
+
+                                <!-- Password -->
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-lg pl-10 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <button type="button" id="toggle-password" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Password must be at least 8 characters</p>
+                                </div>
+
+                                <!-- Contact Number -->
+                                <div>
+                                    <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                            </svg>
+                                        </div>
+                                        <input type="text" id="contact_number" name="contact_number" class="w-full border border-gray-300 rounded-lg pl-10 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" value="{{ request.POST.contact_number }}" required pattern="\d{11}" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11)">
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Enter 11-digit phone number</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Picture - Full Width -->
+                        <div class="pt-4">
+                            <label for="profile_picture" class="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+                            <div class="flex items-center space-x-6">
+                                <div class="shrink-0">
+                                    <img id="preview-image" class="h-16 w-16 object-cover rounded-full" src="{% static 'images/default-avatar.png' %}" alt="Profile preview">
+                                </div>
+                                <label class="block">
+                                    <span class="sr-only">Choose profile photo</span>
+                                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="block w-full text-sm text-gray-500
+                                    file:mr-4 file:py-2 file:px-4
+                                    file:rounded-md file:border-0
+                                    file:text-sm file:font-semibold
+                                    file:bg-blue-50 file:text-blue-700
+                                    hover:file:bg-blue-100">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Button Group -->
+                        <div class="pt-6 flex justify-end space-x-3 border-t border-gray-200">
+                            <button type="reset" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                Reset
+                            </button>
+                            <button type="button" id="open-modal" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
+                                    <path d="M16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                                </svg>
+                                Create Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Message -->
+                    <div id="success-message" class="hidden mt-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="font-medium">Account created successfully!</p>
+                                <p class="text-sm mt-1">The new user can now log in with their credentials.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
-
-            <form method="POST" action="{% url 'create_user' %}" enctype="multipart/form-data" id="create-user-form">
-                {% csrf_token %}
-
-                <!-- First Name -->
-                <div class="mb-6">
-                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                    <input type="text" id="first_name" name="first_name" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.first_name }}" required>
-                </div>
-
-                <!-- Middle Name (Optional) -->
-                <div class="mb-6">
-                    <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
-                    <input type="text" id="middle_name" name="middle_name" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.middle_name }}">
-                </div>
-
-                <!-- Last Name -->
-                <div class="mb-6">
-                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.last_name }}" required>
-                </div>
-
-                <!-- Nickname (Optional) -->
-                <div class="mb-6">
-                    <label for="nickname" class="block text-sm font-medium text-gray-700 mb-2">Nickname</label>
-                    <input type="text" id="nickname" name="nickname" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.nickname }}" placeholder="Enter your nickname">
-                </div>
-
-                <!-- Username -->
-                <div class="mb-6">
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input type="text" id="username" name="username" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.username }}" required>
-                </div>
-
-                <!-- Password -->
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-4 py-2" required>
-                </div>
-
-                <!-- Profile Picture -->
-                <div class="mb-6">
-                    <label for="profile_picture" class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
-                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white cursor-pointer">
-                </div>
-
-
-                <!-- Contact Number -->
-                <div class="mb-6">
-                    <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-                    <input type="text" id="contact_number" name="contact_number" class="w-full border border-gray-300 rounded-md px-4 py-2" value="{{ request.POST.contact_number }}" required pattern="\d{11}" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11)">
-                </div>
-
-                <!-- Submit Button -->
-                <div class="flex justify-end">
-                    <button type="button" id="open-modal" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                        Create Account
-                    </button>
-                </div>
-            </form>
-
-            <!-- Success Message -->
-            <div id="success-message" class="hidden mt-6 text-green-600 text-center">
-                <p>Account created successfully.</p>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Confirmation Modal -->
-<div id="confirmation-modal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Confirm Account Creation</h3>
-        <p class="mb-4 text-sm text-gray-600">Are you sure you want to create this user account?</p>
-        <div class="flex justify-end space-x-4">
-            <button id="close-modal" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">No</button>
-            <button id="confirm-create" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Yes</button>
+<div id="confirmation-modal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 hidden z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform transition-all">
+        <!-- Modal Header -->
+        <div class="bg-gray-50 rounded-t-xl px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                </svg>
+                Confirm Account Creation
+            </h3>
+        </div>
+        <!-- Modal Body -->
+        <div class="px-6 py-4">
+            <p class="text-gray-700">Are you sure you want to create this user account? This action cannot be undone.</p>
+            <div class="mt-3 text-sm text-gray-600">
+                <p>The user will be able to log in immediately after creation.</p>
+            </div>
+        </div>
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 bg-gray-50 rounded-b-xl border-t border-gray-200 flex justify-end space-x-4">
+            <button id="close-modal" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
+                Cancel
+            </button>
+            <button id="confirm-create" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Create Account
+            </button>
         </div>
     </div>
 </div>
 
 <script>
+    // Modal functionality
     document.getElementById('open-modal').addEventListener('click', function() {
         document.getElementById('confirmation-modal').classList.remove('hidden');
     });
@@ -114,6 +236,33 @@
     document.getElementById('confirm-create').addEventListener('click', function() {
         document.getElementById('create-user-form').submit();
         document.getElementById('confirmation-modal').classList.add('hidden');
+    });
+    
+    // Toggle password visibility
+    document.getElementById('toggle-password').addEventListener('click', function() {
+        const passwordInput = document.getElementById('password');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        // Toggle icon
+        const icon = this.querySelector('svg');
+        if (type === 'text') {
+            icon.innerHTML = '<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 00-2.79.588l.77.771A5.944 5.944 0 018 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0114.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z" /><path d="M11.297 9.176a3.5 3.5 0 00-4.474-4.474l.823.823a2.5 2.5 0 012.829 2.829l.822.822zm-2.943 1.299l.822.822a3.5 3.5 0 01-4.474-4.474l.823.823a2.5 2.5 0 002.829 2.829z" /><path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 001.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 018 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709z" /><path fill-rule="evenodd" d="M13.646 14.354l-12-12 .708-.708 12 12-.708.708z" clip-rule="evenodd" />';
+        } else {
+            icon.innerHTML = '<path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />';
+        }
+    });
+
+    // Preview profile image
+    document.getElementById('profile_picture').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-image').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
     });
 </script>
 {% endblock %}
